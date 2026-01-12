@@ -1,21 +1,22 @@
 const User = require("../models/user");
 
 module.exports.renderSignupForm = (req, res) => {
-  res.render("users/signup");
+  res.render("users/signup.ejs");
 };
 
-module.exports.signup = async (req, res) => {
+module.exports.signup = async (req, res, next) => {
   try {
     let { username, email, password } = req.body;
     const newUser = new User({ username, email });
     const registeredUser = await User.register(newUser, password);
+    //Auto login
     req.login(registeredUser, (err) => {
       if (err) {
         return next(err);
       }
+      req.flash("success", "Welcome to StaySphere!");
+      res.redirect("/listings");
     });
-    req.flash("success", "Welcome to StaySphere!");
-    res.redirect("/listings");
   } catch (err) {
     console.log(err);
     req.flash("error", err.message);
@@ -28,7 +29,7 @@ module.exports.renderLoginForm = (req, res) => {
 };
 
 module.exports.login = async (req, res) => {
-  req.flash("success", "Welcome back!");
+  req.flash("success", "Welcome back to StaySphere!");
   let redirectUrl = res.locals.redirectUrl || "/listings";
   // res.redirect(res.locals.redirectUrl);
   res.redirect(redirectUrl);

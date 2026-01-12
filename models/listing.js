@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema; // bar bar na likhna pve mongoose.schema
 const Review = require("./review");
 
-const listingSchema = new Schema({
+const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: {
     type: String,
@@ -25,7 +25,7 @@ const listingSchema = new Schema({
   reviews: [
     {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Review",
     },
   ],
   owner: {
