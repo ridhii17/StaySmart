@@ -9,15 +9,8 @@ const listingSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    filename: {
-      type: String,
-      default: "listingimage",
-    },
-    url: {
-      type: String,
-      default:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8vjkIycG8WKgYLI_tkdqP9LxO5iAAX0yFWA&s",
-    },
+    url: String,
+    filename: String,
   },
   price: Number,
   location: String,
