@@ -10,6 +10,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -20,10 +21,8 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user");
 
 //MongoDB
-const MONGO_URL = "mongodb://localhost:27017/StaySphere";
-async function main() {
-  await mongoose.connect(MONGO_URL);
-}
+// const MONGO_URL = "mongodb://localhost:27017/StaySphere";
+const dbURL = process.env.ATLAS_URL;
 
 main()
   .then(() => {
@@ -33,6 +32,9 @@ main()
     console.log(err);
   });
 
+async function main() {
+  await mongoose.connect(dbURL);
+}
 //view engine
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -43,10 +45,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); // serve static files css work
 
+const store = MongoStore.create({
+  mongoUrl: dbURL,
+  crypto: {
+    secret: "mysupersecretcode!",
+  },
+  touchAfter: 24 * 3600,
+});
+
+store.on("error", (e) => {
+  console.log("SESSION STORE ERROR", e);
+});
+
 const sessionOptions = {
+  store,
   secret: "mysupersecretcode!",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     httpOnly: true,
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,

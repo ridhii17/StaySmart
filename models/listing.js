@@ -29,7 +29,7 @@ const listingSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ["Point"], // 'geometry.type' must be 'Point'
-      required: true,
+      // required: true,
     },
     coordinates: {
       type: [Number],
