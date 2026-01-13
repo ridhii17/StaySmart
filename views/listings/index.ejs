@@ -4,6 +4,7 @@
 <!-- <FORM action="/listings/new" method="GET">
       <button>Create New Listing</button>
     </FORM> -->
+
 <link rel="stylesheet" href="/css/filter.css" />
 <div class="filters-main">
   <div id="filters">
@@ -294,7 +295,23 @@
     </div>
   </div>
 </div>
-
+<div class="tax-toggle tax-sticky">
+  <div class="form-check form-switch form-check-reverse">
+    <input
+      class="form-check-input tax-switch tax-sticky-sticky shadow-none"
+      type="checkbox"
+      role="switch"
+      id="flexSwitchCheckDefaultS"
+      style="cursor: pointer"
+    />
+    <label
+      class="form-check-label changeAfter"
+      for="flexSwitchCheckDefaultS"
+      style="cursor: pointer"
+      >Display total before taxes</label
+    >
+  </div>
+</div>
 <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
   <% for (let listing of listings) { %>
   <a href="/listings/<%= listing._id %>" class="listing-link">
@@ -318,3 +335,5 @@
   </a>
   <% } %>
 </div>
+ <script defer src="/js/filter.js"></script>
+        
