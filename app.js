@@ -21,7 +21,6 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user");
 
 //MongoDB
-// const MONGO_URL = "mongodb://localhost:27017/StaySphere";
 const dbURL = process.env.ATLAS_URL;
 
 main()
@@ -48,7 +47,7 @@ app.use(express.static(path.join(__dirname, "public"))); // serve static files c
 const store = MongoStore.create({
   mongoUrl: dbURL,
   crypto: {
-    secret: "mysupersecretcode!",
+    secret: process.env.SECRET,
   },
   touchAfter: 24 * 3600,
 });
@@ -59,7 +58,7 @@ store.on("error", (e) => {
 
 const sessionOptions = {
   store,
-  secret: "mysupersecretcode!",
+  secret: process.env.SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {

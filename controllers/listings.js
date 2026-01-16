@@ -1,7 +1,5 @@
+const axios = require("axios");
 const Listing = require("../models/listing");
-// const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-// const mapToken = process.env.mapToken;
-// const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 module.exports.index = async (req, res) => {
   const listings = await Listing.find({});
@@ -30,26 +28,52 @@ module.exports.showListing = async (req, res) => {
 };
 
 module.exports.createListing = async (req, res, next) => {
-  // let response = await geocodingClient
-  //   .forwardGeocode({
-  //     query: req.body.listing.location,
-  //     limit: 1,
-  //   })
-  //   .send();
+  try {
+    const geoKey = process.env.GEOAPIFY_KEY;
+    //Create listing first 
+    const newListing = new Listing(req.body.listing);
+    //Get uploaded image 
+    if (req.file) {
+      newListing.image = {
+        url: req.file.path,
+        filename: req.file.filename,
+      };
+    }
+    //Owner 
+    newListing.owner = req.user._id;
+    // Geoapify geocode 
+    const locationText = `${req.body.listing.location}, ${req.body.listing.country}`;
+    const geoRes = await axios.get(
+      "https://api.geoapify.com/v1/geocode/search",
+      {
+        params: {
+          text: locationText,
+          apiKey: geoKey,
+          format: "json",
+          limit: 1,
+        },
+      }
+    );
 
-  let url = req.file.path;
-  let filename = req.file.filename;
+    const result = geoRes.data.results[0];
+    if (!result) {
+      req.flash("error", "Location not found on map!");
+      return res.redirect("/listings/new");
+    }
+    //Now add geometry
+    newListing.geometry = {
+      type: "Point",
+      coordinates: [result.lon, result.lat],
+    };
 
-  const newListing = new Listing(req.body.listing);
-  newListing.owner = req.user._id; // add owner
-  newListing.image = { url, filename };
+    // Save 
+    await newListing.save();
 
-  // newListing.geometry = response.body.features[0].geometry;
-
-  let savedListing = await newListing.save();
-
-  req.flash("success", "Successfully created a new listing!");
-  res.redirect("/listings");
+    req.flash("success", "Successfully created a new listing!");
+    res.redirect("/listings");
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports.renderEditForm = async (req, res) => {
@@ -86,3 +110,26 @@ module.exports.destroyListing = async (req, res) => {
   req.flash("success", "Listing deleted!");
   res.redirect("/listings");
 };
+
+// module.exports.createListing = async (req, res, next) => {
+//   // let response = await geocodingClient
+//   //   .forwardGeocode({
+//   //     query: req.body.listing.location,
+//   //     limit: 1,
+//   //   })
+//   //   .send();
+
+//   let url = req.file.path;
+//   let filename = req.file.filename;
+
+//   const newListing = new Listing(req.body.listing);
+//   newListing.owner = req.user._id; // add owner
+//   newListing.image = { url, filename };
+
+//   // newListing.geometry = response.body.features[0].geometry;
+
+//   let savedListing = await newListing.save();
+
+//   req.flash("success", "Successfully created a new listing!");
+//   res.redirect("/listings");
+// };
