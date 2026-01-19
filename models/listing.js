@@ -48,5 +48,18 @@ listingSchema.post("findOneAndDelete", async (listing) => {
   }
 });
 
+// -------ADD-------
+// -------ADD-------
+listingSchema.pre(
+  "deleteMany",
+  { document: false, query: true },
+  async function () {
+    const listings = await this.model.find(this.getFilter()); // Get listings being deleted
+    const reviewIds = listings.flatMap((listing) => listing.reviews); // Extract review IDs
+    await Review.deleteMany({ _id: { $in: reviewIds } }); // Delete associated reviews
+  }
+);
+
+
 const Listing = mongoose.model("Listing", listingSchema);
 module.exports = Listing;

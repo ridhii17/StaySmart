@@ -7,8 +7,7 @@
   <div class="container-fluid">
     <!-- Logo -->
     <a class="navbar-brand" href="/listings"
-      ><i class="fa-regular fa-compass"></i
-    ></a>
+      ><i class="fa-solid fa-section fa-xl"></i></a>
     <!-- Toggler -->
     <button
       class="navbar-toggler"
@@ -25,7 +24,7 @@
       </div>
 
       <div class="navbar-nav ms-auto">
-        <form class="d-flex" role="search">
+        <form class="d-flex needs-validation" role="search" action="/listings/search" method="get" id="searchBox">
           <input
             class="form-control me-2 search-input"
             type="search"
@@ -36,20 +35,10 @@
           </button>
         </form>
 
-        <!-- <form class="d-flex nav-search" role="search">
-          <input
-            class="form-control search-input"
-            type="search"
-            placeholder="Search Destinations"
-          />
-          <button class="btn search-btn" type="submit">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <span class="search-text">Search</span>
-          </button>
-        </form> -->
       </div>
 
       <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/profile">Profile</a>
         <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
         <% if(!currentUser) { %>
         <a class="nav-link" href="/signup"><b>Sign Up</b></a>

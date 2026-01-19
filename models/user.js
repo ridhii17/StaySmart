@@ -7,6 +7,20 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  // -----ADD---
+  // -----ADD---
+  fName: {
+    type: String,
+    required: true,
+  },
+  lName: {
+    type: String,
+    // required: true
+  },
+  image: {
+    url: String,
+    filename: String,
+  },
 });
 
 userSchema.plugin(passportLocalMongoose);

@@ -1,0 +1,532 @@
+
+/* ----------- Root / Reset ----------- */
+:root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+  --danger: #dc2626;
+  --danger-2: #b91c1c;
+  --success: #16a34a;
+
+  --shadow: 0 12px 30px rgba(17, 24, 39, 0.10);
+  --shadow-sm: 0 8px 18px rgba(17, 24, 39, 0.08);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+
+  --gap: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* if your boilerplate adds container, this will fit nicely */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+/* ----------- Page Wrapper ----------- */
+.main-profiles {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 14px 14px 10px;
+}
+
+/* ----------- Top Profile Section ----------- */
+.main-profile-detail {
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+/* left cluster - user img + details */
+.profile-img {
+  position: relative;
+  width: 92px;
+  min-width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid rgba(37, 99, 235, 0.20);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Change image camera icon */
+#change-image {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+#change-image a {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  text-decoration: none;
+}
+
+#change-image i {
+  font-size: 15px;
+}
+
+/* User text block */
+.profile-user {
+  flex: 1;
+  min-width: 220px;
+  padding: 4px 6px;
+}
+
+.profile-user h3,
+.profile-user h4 {
+  margin: 6px 0;
+  line-height: 1.25;
+}
+
+.profile-user h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-user h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.profile-user span {
+  color: var(--muted);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+/* ----------- Manage buttons area ----------- */
+.manage {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.manage form {
+  margin: 0;
+}
+
+/* base button */
+.update,
+.list-btn,
+.deleteAll,
+.create-list {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Update Account */
+.update {
+  background: var(--primary);
+  color: #fff;
+}
+
+.update:hover {
+  background: var(--primary-2);
+  transform: translateY(-1px);
+}
+
+/* Delete Account */
+.list-delete {
+  background: var(--danger);
+  color: #fff;
+}
+
+.list-delete:hover {
+  background: var(--danger-2);
+  transform: translateY(-1px);
+}
+
+/* show button */
+.list-show {
+  background: #111827;
+  color: #fff;
+}
+
+.list-show a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.list-show:hover {
+  transform: translateY(-1px);
+  background: #0b1220;
+}
+
+/* hide 2nd manage section by default */
+.manage-hide {
+  display: none;
+}
+
+/* ----------- Tabs / Choose list ----------- */
+.choose-list {
+  margin-top: 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.choose-list > div {
+  position: relative;
+  flex: 1;
+}
+
+.choose-list label {
+  width: 100%;
+  display: block;
+  text-align: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 999px;
+  color: var(--muted);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.choose-list input[type="radio"] {
+  display: none;
+}
+
+/* highlight style with CSS only (works if input+label are correct order)
+   Your HTML uses label(for) + input below, so we can't use input:checked + label
+   We'll still provide "active" styling via JS in /js/profile.js or fallback:
+*/
+.choose-list label:hover {
+  color: var(--text);
+  border-color: rgba(37, 99, 235, 0.25);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+/* ----------- Listing & Review Section Header ----------- */
+.listing-count {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 10px 0 10px;
+}
+
+.listing-count h3 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.index-res b {
+  font-weight: 900;
+}
+
+.deleteAll {
+  background: #111827;
+  color: #fff;
+}
+
+.deleteAll:hover {
+  transform: translateY(-1px);
+  background: #0b1220;
+}
+
+/* Create listing link */
+.create-list {
+  background: var(--success);
+  color: #fff;
+  text-decoration: none;
+  margin-right: 8px;
+}
+
+.create-list:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+}
+
+/* ----------- Grid Cards Area ----------- */
+.profile-box {
+  padding-bottom: 10px;
+}
+
+/* remove underline on card links */
+.listing-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.listing-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background: var(--card);
+}
+
+.listing-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Image wrapper */
+.index-res-img {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-img {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.card-img img,
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* card body */
+.card-body {
+  padding: 12px 12px 0;
+}
+
+.card-text b {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+/* review body custom */
+#review-body {
+  padding-bottom: 10px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+#review-body span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+#review-body b {
+  color: var(--text);
+}
+
+/* Rating row */
+.ratingBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons under cards */
+.lists-btn {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.lists-btn form {
+  margin: 0;
+}
+
+.list-btn {
+  padding: 9px 12px;
+  font-size: 0.9rem;
+}
+
+/* ----------- Responsive: fix bootstrap row spacing look ----------- */
+.row.profile-box {
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.row.profile-box > * {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* ----------- Small text helpers used in your HTML ----------- */
+.index-res {
+  width: 100%;
+}
+
+/* ----------- Mobile Responsive Breakpoints ----------- */
+@media (max-width: 992px) {
+  .main-profile-detail {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .manage {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .profile-user {
+    min-width: 100%;
+  }
+
+  .profile-img {
+    width: 84px;
+    min-width: 84px;
+    height: 84px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-profiles {
+    padding: 10px 10px 4px;
+  }
+
+  .main-profile-detail {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .profile-user h3 {
+    font-size: 1rem;
+  }
+
+  .profile-user h4 {
+    font-size: 0.9rem;
+  }
+
+  .card-img {
+    height: 170px;
+  }
+
+  .listing-count {
+    gap: 8px;
+  }
+
+  .listing-count h3 {
+    font-size: 1rem;
+  }
+
+  .deleteAll,
+  .create-list,
+  .update,
+  .list-btn {
+    padding: 9px 12px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .main-profile-detail {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-img {
+    width: 78px;
+    min-width: 78px;
+    height: 78px;
+  }
+
+  #change-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .manage {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .choose-list {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .choose-list label {
+    padding: 10px 8px;
+    font-size: 0.92rem;
+  }
+
+  .lists-btn {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .list-btn,
+  .deleteAll {
+    width: 100%;
+  }
+
+  .card-img {
+    height: 160px;
+  }
+}

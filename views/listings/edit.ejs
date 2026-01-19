@@ -4,11 +4,16 @@
     <h2>Edit your Listing</h2>
     <br>
     <form method="POST" action="/listings/<%=listing.id%>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+        
+        <!-- Title -->
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required>
+            <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control border border-black border-opacity-50" required>
             <div class="valid-feedback">Title looks good</div>
+            <div class="invalid-feedback">Title should be valid</div>
         </div>
+
+        <!-- Category -->
         <div class="mb-3">
             <label for="category">Category</label>
             <select id="category" name="listing[category]" class="form-control" required>
@@ -27,40 +32,77 @@
             </select>
                          
         </div>
+
+        <!-- Description -->
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea name="listing[description]" class="form-control" required><%=listing.description%></textarea>
+            <textarea name="listing[description]" class="form-control border border-black border-opacity-50" required><%=listing.description%></textarea>
             <div class="invalid-feedback">Please provide a short description!</div>
         </div>
 
+        <!-- Image -->
         <div>
             Original Listing Image <br>
             <img src="<%= originalImageUrl %>" />
         </div>
+        <div class="row mb-3">
         <div class="mb-3">
             <label for="image" class="form-label">Upload New Image Or Else No Change</label>
             <input 
                 name="listing[image]" 
                 type="file" 
-                class="form-control"
+                class="form-control border border-black border-opacity-50" id="verify-img"
+                onchange="previewImage()"
                 />
+                <p id="errorContainer"></p>
+        </div>
+
+        <!-- Verify -->
+          <div class="col-2">
+                        <label class="form-control border border-white" style="margin-left: -15px;font-weight: 700;"
+                            for="verify">Verify</label>
+                        <input type="checkbox" checked id="verify"
+                            class="form-btn btn ms-2 border border-black border-opacity-50" required
+                            style="height: 25px; width:25px;">
+                        <div class="invalid-feedback">Verify</div>
+                    </div>
         </div>
         
-        <div class="row">
-            <div class="mb-3 col-md-4">
-                <label for="price" class="form-label">Price</label>
-                <input name="listing[price]" value="<%=listing.price%>" type="number" class="form-control" required>
-                <div class="invalid-feedback">Price should be valid!</div>
-            </div>
-            <div class="mb-3 col-md-8">
-                <label for="country" class="form-label">Country</label>
-                <input name="listing[country]" value="<%=listing.country%>" type="text" class="form-control" required>
-                <div class="invalid-feedback">Country name should be valid!</div>
-            </div>
-        </div>
+         <div class="mb-3">
+                    <label for="image" class="form-label">Update Image Preview</label><br>
+                    <div id="imagePreview" class="listingImg">
+                        <img src="/Icon/listing-img-pre.png" alt="demo">
+                    </div>
+                </div>
+
+                <!-- Price , Country -->
+                        <div class="row">
+                    <div class="mb-3 col-md-4">
+                        <label for="price" class="form-label">Price</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">₹</span>
+                            </div>
+                            <input type="number" value="<%= listing.price %>" name="listing[price]"
+                                class="form-control border border-black border-opacity-50" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text">.00</span>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback">Price should be valid</div>
+                    </div>
+                    <div class="mb-3 col-md-8">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" value="<%= listing.country %>" name="listing[country]"
+                            class="form-control border border-black border-opacity-50" required>
+                        <div class="invalid-feedback">Country name should be valid</div>
+                    </div>
+                </div>
+
+        <!-- Location -->
         <div class="mb-3">
             <label for="location" class="form-label">Location</label>
-            <input name="listing[location]" value="<%=listing.location%>" type="text" class="form-control" required>
+            <input name="listing[location]" value="<%=listing.location%>" type="text" class="form-control border border-black border-opacity-50" required>
             <div class="invalid-feedback">Location should be valid!</div>
         </div>
         
@@ -68,3 +110,6 @@
     </form>
     </div>
 </div>
+
+    <script src="/js/editImg-size.js"></script>
+    <script src="/js/image-preview.js"></script>

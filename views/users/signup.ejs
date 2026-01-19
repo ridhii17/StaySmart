@@ -1,41 +1,96 @@
 <% layout("/layouts/boilerplate") %>
 
+<link rel="stylesheet" href="/css/button-style.css" />
+<link rel="stylesheet" href="/css/auth-account.css" />
+
 <div class="row -3">
   <h1 class="col-6 offset-3">Sign Up on StaySphere</h1>
+  <h4 class="col-6 offset-3">Have an account? <a href="/login">Log In</a></h4>
   <div class="col-6 offset-3">
     <form action="/signup" method="post" class="needs-validation" novalidate>
       <div class="mb-3">
-        <label for="username" class="form-label">Username</label>
+        <label for="fName" class="form-label">First Name</label>
         <input
-          name="username"
-          id="username"
+          id="fName"
           type="text"
-          class="form-control"
+          placeholder="Enter First Name"
+          name="fName"
+          class="form-control border border-black border-opacity-50"
           required
         />
         <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">First Name should be valid</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="lName" class="form-label">Last Name</label>
+        <input
+          id="lName"
+          type="text"
+          placeholder="Enter Last Name"
+          name="lName"
+          class="form-control border border-black border-opacity-50"
+          required
+        />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Last Name should be valid</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input
+          placeholder="Enter Username"
+          name="username"
+          id="username"
+          type="text"
+          class="form-control border border-black border-opacity-50"
+          required
+        />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Username should be valid</div>
       </div>
 
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
         <input
+          placeholder="Enter Email"
           name="email"
           id="email"
           type="email"
-          class="form-control"
+          class="form-control border border-black border-opacity-50"
           required
         />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Email should be valid</div>
       </div>
 
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
         <input
+          placeholder="Enter Password"
           name="password"
           id="password"
           type="password"
-          class="form-control"
+          class="form-control border border-black border-opacity-50"
           required
         />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">
+          Please lengthen this text to 8 charaters or more.
+        </div>
+      </div>
+
+      <div class="form-check mb-2 mr-sm-2">
+        <input
+          class="form-check-input mt-2"
+          style="opacity: 1"
+          type="checkbox"
+          id="inlineFormCheck"
+          required
+        />
+        <label class="form-check-label ms-3 mt-1" for="inlineFormCheck">
+          Remember me
+        </label>
       </div>
 
       <button type="submit" class="btn btn-success">Sign Up</button>

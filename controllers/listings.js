@@ -30,18 +30,18 @@ module.exports.showListing = async (req, res) => {
 module.exports.createListing = async (req, res, next) => {
   try {
     const geoKey = process.env.GEOAPIFY_KEY;
-    //Create listing first 
+    //Create listing first
     const newListing = new Listing(req.body.listing);
-    //Get uploaded image 
+    //Get uploaded image
     if (req.file) {
       newListing.image = {
         url: req.file.path,
         filename: req.file.filename,
       };
     }
-    //Owner 
+    //Owner
     newListing.owner = req.user._id;
-    // Geoapify geocode 
+    // Geoapify geocode
     const locationText = `${req.body.listing.location}, ${req.body.listing.country}`;
     const geoRes = await axios.get(
       "https://api.geoapify.com/v1/geocode/search",
@@ -52,7 +52,7 @@ module.exports.createListing = async (req, res, next) => {
           format: "json",
           limit: 1,
         },
-      }
+      },
     );
 
     const result = geoRes.data.results[0];
@@ -66,7 +66,7 @@ module.exports.createListing = async (req, res, next) => {
       coordinates: [result.lon, result.lat],
     };
 
-    // Save 
+    // Save
     await newListing.save();
 
     req.flash("success", "Successfully created a new listing!");
@@ -109,6 +109,106 @@ module.exports.destroyListing = async (req, res) => {
   await Listing.findByIdAndDelete(id);
   req.flash("success", "Listing deleted!");
   res.redirect("/listings");
+};
+
+//-------ADD-------
+//-------ADD-------
+module.exports.filter = async (req, res, next) => {
+  let { id } = req.params;
+  let listings = await Listing.find({ category: { $all: [id] } });
+  console.log(listings);
+  if (listings.length != 0) {
+    res.locals.success = `Listings Find by ${id}`;
+    res.render("listings/index.ejs", { allListing: listings });
+  } else {
+    req.flash("error", "Listings is not here !!!");
+    res.redirect("/listings");
+  }
+};
+
+module.exports.filterbtn = (req, res, next) => {
+  res.render("listings/filterbtn.ejs");
+};
+
+module.exports.search = async (req, res) => {
+  console.log(req.query.q);
+  let input = req.query.q.trim().replace(/\s+/g, " "); // remove start and end space and middle space remove and middle add one space------
+  console.log(input);
+  if (input == "" || input == " ") {
+    //search value empty
+    req.flash("error", "Search value empty !!!");
+    res.redirect("/listings");
+  }
+
+  // convert every word 1st latter capital and other small---------------
+  let data = input.split("");
+  let element = "";
+  let flag = false;
+  for (let index = 0; index < data.length; index++) {
+    if (index == 0 || flag) {
+      element = element + data[index].toUpperCase();
+    } else {
+      element = element + data[index].toLowerCase();
+    }
+    flag = data[index] == " ";
+  }
+  console.log(element);
+
+  let listings = await Listing.find({
+    title: { $regex: element, $options: "i" },
+  });
+  if (listings.length != 0) {
+    res.locals.success = "Listings searched by Title";
+    res.render("listings/index.ejs", { allListing: listings });
+    return;
+  }
+  if (listings.length == 0) {
+    listings = await Listing.find({
+      category: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (listings.length != 0) {
+      res.locals.success = "Listings searched by Category";
+      res.render("listings/index.ejs", { allListing: listings });
+      return;
+    }
+  }
+  if (listings.length == 0) {
+    listings = await Listing.find({
+      country: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (listings.length != 0) {
+      res.locals.success = "Listings searched by Country";
+      res.render("listings/index.ejs", { allListing: listings });
+      return;
+    }
+  }
+  if (listings.length == 0) {
+    let listings = await Listing.find({
+      location: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (listings.length != 0) {
+      res.locals.success = "Listings searched by Location";
+      res.render("listings/index.ejs", { allListing: listings });
+      return;
+    }
+  }
+  const intValue = parseInt(element, 10); // 10 for decimal return - int ya NaN
+  const intDec = Number.isInteger(intValue); // check intValue is Number & Not Number return - true ya false
+
+  if (listings.length == 0 && intDec) {
+    listings = await Listing.find({ price: { $lte: element } }).sort({
+      price: 1,
+    });
+    if (listings.length != 0) {
+      res.locals.success = `Listings searched for less than Rs ${element}`;
+      res.render("listings/index.ejs", { listings: listings });
+      return;
+    }
+  }
+  if (listings.length == 0) {
+    req.flash("error", "Listings is not here !!!");
+    res.redirect("/listings");
+  }
 };
 
 // module.exports.createListing = async (req, res, next) => {

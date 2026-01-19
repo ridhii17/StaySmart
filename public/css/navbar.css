@@ -25,9 +25,14 @@
   background-color: #fff;
 }
 
-/* RESPONSIVE NAVBAR
+.navbar-brand i {
+  color: #fe424d;
+  margin-left: 1rem;
+}
 
-Tablet & below
+/* RESPONSIVE NAVBAR */
+
+/* Tablet & below */
 @media (max-width: 991px) {
   .navbar-nav {
     gap: 0.5rem;
@@ -54,7 +59,7 @@ Tablet & below
   }
 }
 
-Mobile
+/* Mobile */
 @media (max-width: 767px) {
   .navbar {
     padding: 0.5rem 0;
@@ -88,11 +93,11 @@ Mobile
   }
 
   .search-text {
-    display: none; icon-only on mobile
+    display: none;
   }
 }
 
-Extra small devices
+/* Extra small devices */
 @media (max-width: 480px) {
   .navbar-brand i {
     font-size: 1.4rem;
@@ -103,4 +108,3 @@ Extra small devices
     font-size: 0.9rem;
   }
 }
- */
