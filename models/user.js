@@ -7,19 +7,19 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  // -----ADD---
-  // -----ADD---
+  // -----ADD----
+  // -----ADD----
   fName: {
     type: String,
-    required: true,
+    default: "",
   },
   lName: {
     type: String,
-    // required: true
+    default: "",
   },
   image: {
-    url: String,
-    filename: String,
+    url: { type: String, default: "" },
+    filename: { type: String, default: "" },
   },
 });
 

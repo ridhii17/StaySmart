@@ -5,11 +5,12 @@
         <div class="main-profiles mt-2">
             <div class="main-profile-detail">
                 <div class="profile-img">
-                    <% if(!currentUser.image.url) {%>
-                        <img src="/Icon/DefaultImg.png">
-                        <% } else{%>
-                            <img src="<%= currentUser.image.url %>">
-                            <% } %>
+                    <% if(!currentUser.image || !currentUser.image.url) { %>
+  <img src="/Icon/DefaultImg.png">
+<% } else { %>
+  <img src="<%= currentUser.image.url %>">
+<% } %>
+
                                 <div id="change-image">
                                     <a href="/change-image/<%= currentUser._id %>">
                                         <i class="fa-solid fa-camera"></i>
@@ -18,8 +19,16 @@
                 </div>
                 <div class="profile-user">
                     <h3><span>Name : </span>
-                        <%= currentUser.fName.split("")[0].toUpperCase() %>
-                            <%= currentUser.fName.slice(1).toLowerCase() %>&nbsp;<%= currentUser.lName %>
+                       <%
+  const fName = currentUser?.fName || "";
+  const lName = currentUser?.lName || "";
+%>
+
+<h3><span>Name : </span>
+  <%= fName ? fName[0].toUpperCase() + fName.slice(1).toLowerCase() : "N/A" %>
+  <%= lName ? " " + lName : "" %>
+</h3>
+
                     </h3>
                     <h3><span>Username : </span>@<%= currentUser.username %>
                     </h3>

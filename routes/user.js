@@ -18,8 +18,7 @@ const {
 const userController = require("../controllers/users");
 // -----ADD-----
 // -----ADD-----
-const multer = require("multer"); //install multer package in npm || multipart/form-data type receive and paras
-// const upload = multer({ dest: 'uploads/' })  //uploads folder me save karega
+const multer = require("multer");
 const { storage } = require("../cloudConfig.js");
 const upload = multer({ storage });
 

@@ -1,52 +1,87 @@
 <link rel="stylesheet" href="/css/navbar.css" />
 
-<!-- link style file -->
-
-<!-- bootstrap -->
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
+
     <!-- Logo -->
-    <a class="navbar-brand" href="/listings"
-      ><i class="fa-solid fa-section fa-xl"></i></a>
-    <!-- Toggler -->
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-solid fa-section fa-xl"></i>
+    </a>
+
+    <!-- ✅ Toggler -->
     <button
       class="navbar-toggler"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- ✅ Collapsing content -->
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
-      </div>
 
-      <div class="navbar-nav ms-auto">
-        <form class="d-flex needs-validation" role="search" action="/listings/search" method="get" id="searchBox">
-          <input
-            class="form-control me-2 search-input"
-            type="search"
-            placeholder="Search Destinations"
-          />
-          <button class="btn search-btn" type="submit">
-            <i class="fa-solid fa-magnifying-glass"></i>Search
-          </button>
-        </form>
+      <ul class="navbar-nav w-100 align-items-md-center flex-nowrap">
 
-      </div>
+        <!-- ✅ LEFT SIDE -->
+        <li class="nav-item">
+          <a class="nav-link" href="/listings">Explore</a>
+        </li>
 
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/profile">Profile</a>
-        <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
+        <!-- ✅ CENTER SEARCH -->
+        <!-- ✅ CHANGED: removed flex-grow-1 -->
+        <!-- ✅ ADDED: mx-auto to push this exactly center -->
+        <li class="nav-item mx-auto my-2 my-md-0"> <!-- ✅ CHANGED -->
+          <form
+            class="d-flex"
+            role="search"
+            action="/listings/search"
+            method="get"
+            id="searchBox"
+          >
+            <input
+              class="form-control search-input"
+              type="search"
+              name="q"
+              placeholder="Search Destinations"
+            />
+
+            <button class="btn search-btn" type="submit">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span class="search-text">Search</span>
+            </button>
+          </form>
+        </li>
+
+        <!-- ✅ RIGHT SIDE -->
+        <li class="nav-item ms-md-auto">
+          <a class="nav-link" href="/profile">Profile</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
+        </li>
+
         <% if(!currentUser) { %>
-        <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-        <a class="nav-link" href="/login"><b>Log In</b></a>
-        <% } %> <% if(currentUser) { %>
-        <a class="nav-link" href="/logout"><b>Log Out</b></a>
+          <li class="nav-item">
+            <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login"><b>Log In</b></a>
+          </li>
         <% } %>
-      </div>
+
+        <% if(currentUser) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout"><b>Log Out</b></a>
+          </li>
+        <% } %>
+
+      </ul>
     </div>
   </div>
 </nav>
+<script src="/js/navbar.js"></script>

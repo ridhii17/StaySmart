@@ -6,7 +6,7 @@ module.exports.renderSignupForm = (req, res) => {
 
 module.exports.signup = async (req, res, next) => {
   try {
-    let { username, email, password , fName, lName } = req.body;
+    let { username, email, password, fName, lName } = req.body;
     const newUser = new User({ username, email, fName, lName });
     const registeredUser = await User.register(newUser, password);
     //Auto login
@@ -73,7 +73,7 @@ module.exports.updatePassword = async (req, res, next) => {
     await user.save();
     req.flash(
       "success",
-      "Your account password has been successfully updated."
+      "Your account password has been successfully updated.",
     );
     res.redirect("/profile");
   } catch (e) {

@@ -1,8 +1,17 @@
+/* -------------------------
+   NAVBAR SEARCH DESIGN
+-------------------------- */
+
 .search-btn {
   background-color: #fe424d;
   color: #fff;
   border-radius: 25px;
-  padding: 0 1rem 0 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .search-btn:hover {
@@ -10,68 +19,58 @@
   color: #fff;
 }
 
-.search-btn i {
-  display: inline;
-  margin-right: 0.5rem;
-}
-
 .search-input {
   border-radius: 25px;
   border: 0.5px solid rgba(128, 128, 128, 0.503);
-  padding: 0.5rem 3rem 0.5rem 3rem;
+  padding: 0.5rem 1.25rem;
   font-size: 1rem;
   height: 3rem;
-  min-width: 18rem;
+  width: 100%; /* ✅ important */
+  min-width: 0; /* ✅ important (fix overflow) */
   background-color: #fff;
 }
 
+/* Logo */
 .navbar-brand i {
   color: #fe424d;
   margin-left: 1rem;
 }
 
-/* RESPONSIVE NAVBAR */
+/* ✅ IMPORTANT: stop horizontal scrolling */
+html,
+body {
+  overflow-x: hidden;
+}
 
-/* Tablet & below */
+/* ✅ Search form always full width */
+#searchBox {
+  width: 100%;
+  max-width: 500px; /* ✅ keeps nice size in desktop */
+}
+
+/* -------------------------
+   RESPONSIVE FIXES
+-------------------------- */
+
+/* ✅ Tablet & below */
 @media (max-width: 991px) {
-  .navbar-nav {
-    gap: 0.5rem;
-  }
-
-  .nav-search {
-    width: 100%;
-    margin: 0.75rem 0;
-  }
-
-  .search-input {
-    width: 100%;
-    min-width: 100%;
-    height: 2.75rem;
-    padding: 0.5rem 1.25rem;
-    font-size: 0.95rem;
-  }
-
-  .search-btn {
-    padding: 0.5rem 1rem;
-    height: 2.75rem;
-    border-radius: 20px;
-    margin-left: 0.5rem;
+  #searchBox {
+    max-width: 100%; /* ✅ full width in smaller screens */
   }
 }
 
-/* Mobile */
+/* ✅ Mobile */
 @media (max-width: 767px) {
-  .navbar {
-    padding: 0.5rem 0;
-  }
-
+  /* collapse menu box */
   .navbar-collapse {
     background: #fff;
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    margin-top: 10px;
   }
 
+  /* center links in mobile */
   .navbar-nav {
     width: 100%;
     text-align: center;
@@ -82,16 +81,27 @@
     font-size: 1rem;
   }
 
-  .nav-search {
-    flex-direction: column;
-    gap: 0.5rem;
+  /* ✅ SEARCH FIX (MOST IMPORTANT PART) */
+  #searchBox {
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .search-btn {
-    width: 100%;
-    margin-left: 0;
+  #searchBox .search-input {
+    height: 2.6rem;
+    font-size: 0.95rem;
   }
 
+  /* ✅ keep button small (NOT full width) */
+  #searchBox .search-btn {
+    height: 2.6rem;
+    padding: 0 14px;
+    border-radius: 50px;
+  }
+
+  /* ✅ hide Search text only in mobile */
   .search-text {
     display: none;
   }
@@ -103,8 +113,31 @@
     font-size: 1.4rem;
   }
 
-  .search-input {
-    height: 2.5rem;
+  #searchBox .search-input {
+    height: 2.4rem;
     font-size: 0.9rem;
   }
+
+  #searchBox .search-btn {
+    height: 2.4rem;
+    padding: 0 12px;
+  }
+}
+
+/* ✅ Prevent navbar items from breaking into new line */
+@media (min-width: 768px) {
+  .navbar-nav {
+    flex-wrap: nowrap !important;
+  }
+
+  /* ✅ Search should not take full space */
+  #searchBox {
+    max-width: 320px; /* ✅ adjust size you like */
+  }
+}
+#searchBox {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
