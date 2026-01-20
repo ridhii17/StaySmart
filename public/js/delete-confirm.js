@@ -1,27 +1,17 @@
-// User button click then display delete confirmation box----------
+const deleteTriggers = document.querySelectorAll(".delete-confirm-trigger");
 
-// single delete btn-----
-const deleteFnx = document.querySelector(".delete-fnx");
-const deleteButton = document.querySelector("#delete-confirm");
-const cancleButton = document.querySelector(".cancle-confirm");
-deleteButton.addEventListener("click", () => {
-  deleteFnx.style.display = "flex";
-});
-cancleButton.addEventListener("click", () => {
-  deleteFnx.style.display = "none";
+deleteTriggers.forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const wrapper = btn.parentElement.querySelector(".fnx-fixed-dis");
+    if (wrapper) wrapper.style.display = "flex";
+  });
 });
 
-// many delete btn------
-const deleteButtons = document.querySelectorAll("#delete-confirm");
-const cancleButtons = document.querySelectorAll(".cancle-confirm");
-for (const button of deleteButtons) {
-  button.addEventListener("click", () => {
-    button.nextSibling.nextSibling.firstChild.nextSibling.style.display =
-      "flex";
+document.querySelectorAll(".cancle-confirm").forEach((cancelBtn) => {
+  cancelBtn.addEventListener("click", () => {
+    const wrapper = cancelBtn.closest(".fnx-fixed-dis");
+    if (wrapper) wrapper.style.display = "none";
   });
-}
-for (const cancleBtn of cancleButtons) {
-  cancleBtn.addEventListener("click", () => {
-    cancleBtn.parentElement.style.display = "none";
-  });
-}
+});

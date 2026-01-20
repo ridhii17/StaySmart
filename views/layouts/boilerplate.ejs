@@ -33,13 +33,17 @@
   <!-- custom css -->
   <link rel="stylesheet" href="/css/style.css" />
   <body>
-    <div class="pageblur">
-      <%- include('../includes/navbar.ejs') %>
-      <div class="container">
-        <%- include("../includes/flash.ejs") %> <%- body %>
+    <body>
+      <div class="pageblur d-flex flex-column" style="min-height: 100vh">
+        <%- include('../includes/navbar.ejs') %>
+
+        <main class="container flex-grow-1">
+          <%- include("../includes/flash.ejs") %> <%- body %>
+        </main>
+
+        <%- include('../includes/footer.ejs') %>
       </div>
-      <%- include('../includes/footer.ejs') %>
-    </div>
+    </body>
 
     <div class="showfilter">
       <div class="filterbtn"><%- include('../includes/filterbtn.ejs') %></div>

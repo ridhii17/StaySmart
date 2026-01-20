@@ -6,11 +6,11 @@
   background-color: #fe424d;
   color: #fff;
   border-radius: 25px;
-  padding: 0.5rem 1rem;
+  padding: 0.45rem 0.9rem;
   border: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
 }
 
@@ -22,9 +22,9 @@
 .search-input {
   border-radius: 25px;
   border: 0.5px solid rgba(128, 128, 128, 0.503);
-  padding: 0.5rem 1.25rem;
-  font-size: 1rem;
-  height: 3rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+  height: 2.6rem;
   width: 100%; /* ✅ important */
   min-width: 0; /* ✅ important (fix overflow) */
   background-color: #fff;
@@ -45,7 +45,7 @@ body {
 /* ✅ Search form always full width */
 #searchBox {
   width: 100%;
-  max-width: 500px; /* ✅ keeps nice size in desktop */
+  max-width: 300px; /* ✅ keeps nice size in desktop */
 }
 
 /* -------------------------
@@ -86,11 +86,12 @@ body {
     max-width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px !important;
   }
 
   #searchBox .search-input {
     height: 2.6rem;
+    padding: 0.4rem 1rem;
     font-size: 0.95rem;
   }
 
@@ -136,8 +137,65 @@ body {
   }
 }
 #searchBox {
+  gap: 4px !important;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* ==========================
+   PERFECT CENTER SEARCH FIX
+========================== */
+
+/* 3-column layout: left / center / right */
+.nav-grid {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+}
+
+/* center item always centered */
+.nav-center {
+  justify-self: center;
+}
+
+/* right links pushed to right */
+.nav-right {
+  justify-self: end;
+}
+
+/* right side links inside one flex row */
+.nav-right-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* make search not stretch huge */
+#searchBox {
+  max-width: 380px;
+}
+
+/* mobile: remove grid, stack normally */
+@media (max-width: 767px) {
+  .nav-grid {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-right-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-center {
+    width: 100%;
+  }
+
+  #searchBox {
+    max-width: 100%;
+  }
 }

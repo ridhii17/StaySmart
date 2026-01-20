@@ -18,18 +18,17 @@
                                 </div>
                 </div>
                 <div class="profile-user">
-                    <h3><span>Name : </span>
-                       <%
+                   <%
   const fName = currentUser?.fName || "";
   const lName = currentUser?.lName || "";
+  const fullName = `${fName} ${lName}`.trim();
 %>
 
-<h3><span>Name : </span>
-  <%= fName ? fName[0].toUpperCase() + fName.slice(1).toLowerCase() : "N/A" %>
-  <%= lName ? " " + lName : "" %>
+<h3>
+  <span>Name :</span>
+  <%= fullName ? fullName : "N/A" %>
 </h3>
 
-                    </h3>
                     <h3><span>Username : </span>@<%= currentUser.username %>
                     </h3>
                     <h4><span>Email : </span>
@@ -40,17 +39,22 @@
                     <form action="/update-form/<%= currentUser._id %>" class="needs-validation">
                         <button class="update">Update Ac</button>
                     </form>
-                    <form method="post" action="/delete/<%= currentUser._id %>?_method=DELETE" class="needs-validation">
-                        <button type="reset" class="list-btn list-delete" id="delete-confirm">Delete Ac</button>
-                        <div class="fnx-fixed-dis">
-                            <div class="delete-fnx" style="display: none;">
-                                <p><b>Are you sure</b></p>
-                                <p>you want to delete your account?</p>
-                                <div class="conf cancle-confirm">Cancel</div>
-                                <button class="conf delete-confirm">Confirm</button>
-                            </div>
-                        </div>
-                    </form>
+                  <form method="post" action="/delete/<%= currentUser._id %>?_method=DELETE">
+  <button type="button" class="list-btn list-delete delete-confirm-trigger">
+    Delete Ac
+  </button>
+
+  <div class="fnx-fixed-dis">
+    <div class="delete-fnx">
+      <p><b>Are you sure</b></p>
+      <p>You want to delete your account?</p>
+
+      <button type="button" class="conf cancle-confirm">Cancel</button>
+      <button type="submit" class="conf delete-confirm">Confirm</button>
+    </div>
+  </div>
+</form>
+
                 </div>
             </div>
             <div class="manage manage-hide">
@@ -58,7 +62,8 @@
                     <button class="update">Update Ac</button>
                 </form>
                 <form method="post" action="/delete/<%= currentUser._id %>?_method=DELETE" class="needs-validation">
-                    <button type="reset" class="list-btn list-delete" id="delete-confirm">Delete Ac</button>
+                    <button type="button" class="deleteAll delete-list delete-confirm-trigger">Delete All</button>
+
                     <div class="fnx-fixed-dis">
                         <div class="delete-fnx" style="display: none;">
                             <p><b>Are you sure</b></p>
@@ -91,7 +96,8 @@
                         </b>&nbsp;Reviews</h3>
                 <form method="post" action="/profile/all-reviews-delete/<%= currentUser._id %>?_method=DELETE"
                     class="needs-validation">
-                    <button type="reset" class="deleteAll delete-list" id="delete-confirm">Delete All</button>
+                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
+>Delete All</button>
                     <div class="fnx-fixed-dis">
                         <div class="delete-fnx" style="display: none;">
                             <p>Are you sure you want to delete the entire reviews?</p>
@@ -124,7 +130,8 @@
                                         action="/profile/review/<%= review.listing %>/<%= review._id %>?_method=DELETE"
                                         class="needs-validation">
                                         <button type="reset" class="list-btn list-delete"
-                                            id="delete-confirm">Delete</button>
+                                            class="delete-confirm-trigger"
+>Delete</button>
                                         <div class="fnx-fixed-dis">
                                             <div class="delete-fnx" style="display: none;">
                                                 <p>I want to delete this review.</p>
@@ -153,7 +160,8 @@
                 <form method="post" action="/profile/all-listings-delete/<%= currentUser._id %>?_method=DELETE"
                     class="needs-validation">
                     <a href="/listings/new" class="deleteAll create-list">Create Li..</a>
-                    <button type="reset" class="deleteAll delete-list" id="delete-confirm">Delete All</button>
+                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
+>Delete All</button>
                     <div class="fnx-fixed-dis">
                         <div class="delete-fnx" style="display: none;">
                             <p>Are you sure you want to delete the entire listings?</p>
@@ -185,7 +193,8 @@
                                     <form method="post" action="/profile/listing/<%= listing._id %>?_method=DELETE"
                                         class="needs-validation">
                                         <button type="reset" class="list-btn list-delete"
-                                            id="delete-confirm">Delete</button>
+                                            class="delete-confirm-trigger"
+>Delete</button>
                                         <div class="fnx-fixed-dis">
                                             <div class="delete-fnx" style="display: none;">
                                                 <p>I want to delete this listing.</p>
@@ -213,7 +222,8 @@
                         </b>&nbsp;Reviews</h3>
                 <form method="post" action="/profile/all-reviews-delete/<%= currentUser._id %>?_method=DELETE"
                     class="needs-validation">
-                    <button type="reset" class="deleteAll delete-list" id="delete-confirm">Delete All</button>
+                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
+>Delete All</button>
                     <div class="fnx-fixed-dis">
                         <div class="delete-fnx" style="display: none;">
                             <p>Are you sure you want to delete the entire reviews?</p>
@@ -246,7 +256,8 @@
                                         action="/profile/review/<%= review.listing %>/<%= review._id %>?_method=DELETE"
                                         class="needs-validation">
                                         <button type="reset" class="list-btn list-delete"
-                                            id="delete-confirm">Delete</button>
+                                            class="delete-confirm-trigger"
+>Delete</button>
                                         <div class="fnx-fixed-dis">
                                             <div class="delete-fnx" style="display: none;">
                                                 <p>I want to delete this review.</p>

@@ -24,7 +24,7 @@
     <!-- ✅ Collapsing content -->
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 
-      <ul class="navbar-nav w-100 align-items-md-center flex-nowrap">
+      <ul class="navbar-nav w-100 align-items-md-center flex-nowrap nav-grid">
 
         <!-- ✅ LEFT SIDE -->
         <li class="nav-item">
@@ -34,7 +34,7 @@
         <!-- ✅ CENTER SEARCH -->
         <!-- ✅ CHANGED: removed flex-grow-1 -->
         <!-- ✅ ADDED: mx-auto to push this exactly center -->
-        <li class="nav-item mx-auto my-2 my-md-0"> <!-- ✅ CHANGED -->
+        <li class="nav-item nav-center my-2 my-md-0">  <!-- ✅ CHANGED -->
           <form
             class="d-flex"
             role="search"
@@ -57,28 +57,24 @@
         </li>
 
         <!-- ✅ RIGHT SIDE -->
-        <li class="nav-item ms-md-auto">
-          <a class="nav-link" href="/profile">Profile</a>
-        </li>
+        <li class="nav-item nav-right">
+  <div class="nav-right-links">
+    <a class="nav-link" href="/profile">Profile</a>
+    <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
 
-        <li class="nav-item">
-          <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
-        </li>
+    <% if(!currentUser) { %>
+      <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+      <a class="nav-link" href="/login"><b>Log In</b></a>
+    <% } %>
 
-        <% if(!currentUser) { %>
-          <li class="nav-item">
-            <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/login"><b>Log In</b></a>
-          </li>
-        <% } %>
+    <% if(currentUser) { %>
+      <a class="nav-link" href="/logout"><b>Log Out</b></a>
+    <% } %>
+  </div>
+</li>
 
-        <% if(currentUser) { %>
-          <li class="nav-item">
-            <a class="nav-link" href="/logout"><b>Log Out</b></a>
-          </li>
-        <% } %>
+
+        
 
       </ul>
     </div>
