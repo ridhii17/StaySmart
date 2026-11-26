@@ -1,31 +1,37 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
-<main class="smart-page">
-  <header class="smart-hero">
-    <div><p class="smart-eyebrow">YOUR RESERVATIONS</p><h1>My Trips</h1><p>Review booking dates, payment status, and cancellation options.</p></div>
-    <a class="smart-button" href="/trips">Open group planner</a>
+<link rel="stylesheet" href="/css/dashboard-suite.css" />
+<% const activeBookings = bookings.filter((booking) => booking.status === "confirmed" && booking.checkIn > new Date()); const confirmedBookings = bookings.filter((booking) => booking.status === "confirmed"); const totalBooked = confirmedBookings.reduce((sum, booking) => sum + Number(booking.total || 0), 0); %>
+<main class="smart-page suite-page guest-dashboard">
+  <header class="smart-hero suite-hero">
+    <div><p class="smart-eyebrow">TRAVELER DASHBOARD</p><h1>Your trips, all together.</h1><p>Keep upcoming stays, check-in dates, and payment details organized in one place.</p></div>
+    <div class="suite-hero__actions"><a class="smart-button smart-button--light" href="/trips"><i class="fa-solid fa-people-group"></i> Group planner</a><a class="smart-button suite-button--white" href="/listings"><i class="fa-solid fa-compass"></i> Find a stay</a></div>
   </header>
-  <% if (bookings.length) { %>
-    <div class="smart-booking-list">
-      <% for (const booking of bookings) { %>
-        <% const paymentLabel = booking.paymentStatus === "paid" ? "Paid securely" : booking.paymentStatus === "refund_pending" ? "Refund processing" : booking.paymentStatus === "refunded" ? "Refunded" : "Demo reservation"; %>
-        <article class="smart-booking">
-          <img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>"/>
-          <div class="smart-booking__body">
-            <p class="smart-eyebrow"><%= booking.status %> · <%= paymentLabel %></p>
-            <h2><%= booking.listing?.title || "Place unavailable" %></h2>
-            <p><%= booking.listing ? [booking.listing.location, booking.listing.country].filter(Boolean).join(", ") : "" %></p>
-            <p><%= booking.checkIn.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> – <%= booking.checkOut.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> · <%= booking.guests %> guests</p>
-            <strong>₹<%= booking.total.toLocaleString("en-IN") %></strong>
-            <details class="booking-receipt"><summary>View price breakdown</summary><p>₹<%= Number(booking.nightlyRate).toLocaleString("en-IN") %> × <%= booking.nights %> nights: ₹<%= Number(booking.subtotal).toLocaleString("en-IN") %></p><p>Service fee: ₹<%= Number(booking.serviceFee).toLocaleString("en-IN") %> · Cleaning: ₹<%= Number(booking.cleaningFee).toLocaleString("en-IN") %></p></details>
-          </div>
-          <% if (booking.status === "confirmed" && booking.checkIn > new Date()) { %>
-            <form method="POST" action="/bookings/<%= booking._id %>/cancel"><button class="smart-button smart-button--outline">Cancel reservation</button></form>
-          <% } %>
-        </article>
-      <% } %>
-    </div>
-  <% } else { %>
-    <div class="smart-empty"><h2>Your next trip starts here</h2><p>Choose a place, select your dates, and review the full cost before confirming.</p><a class="smart-button" href="/listings">Explore places</a></div>
-  <% } %>
+  <section class="suite-metrics" aria-label="Trip summary">
+    <article><span class="suite-metric-icon suite-metric-icon--teal"><i class="fa-solid fa-suitcase-rolling"></i></span><div><small>Upcoming stays</small><strong><%= activeBookings.length %></strong><span>ready for your next trip</span></div></article>
+    <article><span class="suite-metric-icon suite-metric-icon--blue"><i class="fa-solid fa-circle-check"></i></span><div><small>Confirmed stays</small><strong><%= confirmedBookings.length %></strong><span>including past trips</span></div></article>
+    <article><span class="suite-metric-icon suite-metric-icon--gold"><i class="fa-solid fa-wallet"></i></span><div><small>Confirmed total</small><strong>₹<%= totalBooked.toLocaleString("en-IN") %></strong><span>reservation totals</span></div></article>
+    <article class="suite-metric-action"><span class="suite-metric-icon suite-metric-icon--violet"><i class="fa-regular fa-heart"></i></span><div><small>Still deciding?</small><strong>Compare your shortlist</strong><a href="/wishlist">Open saved places <i class="fa-solid fa-arrow-right"></i></a></div></article>
+  </section>
+
+  <section class="suite-content-panel">
+    <header class="suite-content-heading"><div><p class="smart-eyebrow">YOUR ITINERARY</p><h2>Reservations</h2><p>Review each stay, its cost, and payment status.</p></div><span class="suite-count"><%= bookings.length %> <%= bookings.length === 1 ? "reservation" : "reservations" %></span></header>
+    <% if (bookings.length) { %>
+      <div class="suite-reservation-list">
+        <% for (const booking of bookings) { const isUpcoming = booking.status === "confirmed" && booking.checkIn > new Date(); const paymentLabel = booking.paymentStatus === "paid" ? "Paid securely" : booking.paymentStatus === "refund_pending" ? "Refund processing" : booking.paymentStatus === "refunded" ? "Refunded" : "Demo reservation"; %>
+          <article class="suite-reservation-card suite-reservation-card--guest">
+            <a class="suite-reservation-card__image" href="/listings/<%= booking.listing?._id || '#' %>"><img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>" loading="lazy" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"/></a>
+            <div class="suite-reservation-card__main">
+              <div class="suite-reservation-card__top"><div><p class="suite-eyebrow"><%= booking.listing ? [booking.listing.location, booking.listing.country].filter(Boolean).join(" · ") : "STAY DETAILS" %></p><h3><%= booking.listing?.title || "Place unavailable" %></h3></div><span class="suite-status <%= booking.status === 'confirmed' ? 'suite-status--confirmed' : 'suite-status--cancelled' %>"><i class="fa-solid <%= booking.status === 'confirmed' ? 'fa-circle-check' : 'fa-circle-xmark' %>"></i> <%= booking.status %></span></div>
+              <div class="suite-reservation-meta"><span><i class="fa-regular fa-calendar"></i> <%= booking.checkIn.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> – <%= booking.checkOut.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %></span><span><i class="fa-solid fa-user-group"></i> <%= booking.guests %> guests</span><span><i class="fa-regular fa-credit-card"></i> <%= paymentLabel %></span></div>
+              <details class="suite-price-details"><summary>View price breakdown</summary><div><span>₹<%= Number(booking.nightlyRate).toLocaleString("en-IN") %> × <%= booking.nights %> nights</span><strong>₹<%= Number(booking.subtotal).toLocaleString("en-IN") %></strong><span>Service fee</span><strong>₹<%= Number(booking.serviceFee).toLocaleString("en-IN") %></strong><span>Cleaning fee</span><strong>₹<%= Number(booking.cleaningFee).toLocaleString("en-IN") %></strong></div></details>
+            </div>
+            <div class="suite-reservation-card__aside"><span class="suite-arrival <%= isUpcoming ? 'is-upcoming' : '' %>"><i class="fa-solid fa-plane-departure"></i> <%= isUpcoming ? "Upcoming" : booking.status === "cancelled" ? "Cancelled" : "Completed" %></span><strong>₹<%= Number(booking.total || 0).toLocaleString("en-IN") %><small> total</small></strong><% if (isUpcoming) { %><form method="POST" action="/bookings/<%= booking._id %>/cancel"><button class="smart-button smart-button--outline">Cancel reservation</button></form><% } else if (booking.listing) { %><a class="suite-text-link" href="/listings/<%= booking.listing._id %>">View place <i class="fa-solid fa-arrow-right"></i></a><% } %></div>
+          </article>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="suite-empty"><span><i class="fa-solid fa-suitcase-rolling"></i></span><h3>Your next trip starts here</h3><p>Choose a place, select your dates, and review the full cost before confirming.</p><a class="smart-button" href="/listings">Explore places</a></div>
+    <% } %>
+  </section>
 </main>

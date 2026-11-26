@@ -1,6 +1,7 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
-<main class="smart-page"><header class="smart-hero"><div><p class="smart-eyebrow">SIDE-BY-SIDE</p><h1>Compare places</h1><p>Use the compare checkboxes on Explore to add up to four stays.</p></div></header>
+<link rel="stylesheet" href="/css/dashboard-suite.css" />
+<main class="smart-page suite-page compare-dashboard"><header class="smart-hero suite-hero"><div><p class="smart-eyebrow">SIDE-BY-SIDE</p><h1>Compare places</h1><p>Use the compare checkboxes on Explore to add up to four stays.</p></div></header>
   <% if (comparisons.length) { %><div class="smart-table-wrap"><table class="smart-table"><thead><tr><th>Details</th><% for (const item of comparisons) { %><th><a href="/listings/<%= item.listing._id %>"><%= item.listing.title %></a><div class="smart-table-photo"><img src="<%= item.listing.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= item.listing.title %>" /></div></th><% } %></tr></thead><tbody>
     <tr><th>Price / night</th><% for (const item of comparisons) { %><td>₹<%= Number(item.listing.price || 0).toLocaleString("en-IN") %></td><% } %></tr>
     <tr><th>Location</th><% for (const item of comparisons) { %><td><%= [item.listing.location, item.listing.country].filter(Boolean).join(", ") %></td><% } %></tr>
@@ -9,6 +10,6 @@
     <tr><th>Guest rating</th><% for (const item of comparisons) { const ratings = (item.listing.reviews || []).map(r => Number(r.rating)).filter(Number.isFinite); const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1) : "New"; %><td><%= avg %><% if (ratings.length) { %> / 5<% } %></td><% } %></tr>
     <tr><th>Trust score</th><% for (const item of comparisons) { %><td><strong><%= item.trustScore %>/100</strong></td><% } %></tr>
     <tr><th>Amenities</th><% for (const item of comparisons) { %><td><%= (item.listing.amenities || []).join(", ") || "Not provided" %></td><% } %></tr>
-    <tr><th>Availability</th><% for (const item of comparisons) { %><td><a href="/bookings/new/<%= item.listing._id %>">Choose dates</a></td><% } %></tr>
+    <tr><th>Host status</th><% for (const item of comparisons) { %><td><%= item.listing.owner?.hostVerificationStatus === "verified" ? "Verified host" : "Host profile" %></td><% } %></tr><tr><th>Stay Passport</th><% for (const item of comparisons) { const passport = [...(item.listing.travelStyles || []), ...(item.listing.accessibilityFeatures || []), ...(item.listing.ecoPractices || [])]; %><td><%= passport.join(", ") || "No details shared" %></td><% } %></tr><tr><th>Availability</th><% for (const item of comparisons) { %><td><a href="/bookings/new/<%= item.listing._id %>">Choose dates</a></td><% } %></tr>
   </tbody></table></div><% } else { %><div class="smart-empty"><h2>No places to compare yet</h2><p>Open Explore and select the Compare box on a few places.</p><a class="smart-button" href="/listings">Explore places</a></div><% } %>
 </main>

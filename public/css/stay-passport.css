@@ -1,0 +1,49 @@
+.property-stay-passport {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #dce9e6;
+  border-radius: 14px;
+  background: #f8fbfa;
+}
+.property-stay-passport > summary { cursor: pointer; color: #17494a; font-weight: 750; }
+.property-stay-passport > summary span { display: block; margin-top: 4px; color: #6b7b81; font-size: .8rem; font-weight: 450; }
+.property-stay-passport > p { margin: .8rem 0; color: #687b80; font-size: .78rem; line-height: 1.5; }
+.property-stay-passport fieldset { margin: .8rem 0 0; padding: .75rem 0 0; border: 0; border-top: 1px solid #e6efec; }
+.property-stay-passport legend { float: none; width: auto; margin: 0 0 .45rem; color: #3a5558; font-size: .8rem; font-weight: 750; }
+.property-stay-passport fieldset > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.property-stay-passport label { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border: 1px solid #dce7e4; border-radius: 999px; background: #fff; color: #475a62; font-size: .77rem; }
+.property-stay-passport input,.stay-passport-filter-grid input { accent-color: #087f78; }
+
+.stay-passport-filter-panel { grid-column: 1 / -1; padding-top: 12px; border-top: 1px solid #edf1f0; color: #536873; }
+.stay-passport-filter-panel > summary { cursor: pointer; color: #087f78; font-size: .84rem; font-weight: 750; }
+.stay-passport-filter-panel > summary span { margin-left: 5px; color: #6d7d82; font-size: .76rem; font-weight: 450; }
+.stay-passport-filter-panel > small { display: block; margin-top: 10px; color: #72818a; font-size: .72rem; }
+.stay-passport-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; margin-top: 12px; }
+.stay-passport-filter-grid fieldset { display: grid; align-content: start; gap: 8px; margin: 0; padding: 12px; border: 1px solid #e3ece9; border-radius: 12px; background: #f9fcfb; }
+.stay-passport-filter-grid legend { float: none; width: auto; padding: 0 4px; color: #405a60; font-size: .77rem; font-weight: 750; }
+.stay-passport-filter-grid label { display: flex; align-items: flex-start; gap: 6px; color: #52646d; font-size: .74rem; font-weight: 500; line-height: 1.3; }
+.stay-passport-filter-grid input { flex: 0 0 auto; width: auto; height: auto; margin: 1px 0 0; }
+
+.stay-card__passport { display: flex; flex-wrap: wrap; gap: 6px; margin: 3px 0 9px; }
+.stay-card__passport span { padding: 5px 8px; border: 1px solid #d9ebe5; border-radius: 999px; background: #f2faf6; color: #28624f; font-size: .68rem; font-weight: 700; }
+
+.stay-passport { margin: 22px 0; padding: 20px; border: 1px solid #dce9e6; border-radius: 16px; background: linear-gradient(135deg, #f7fbfa, #fff); }
+.stay-passport > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.stay-passport h2 { margin: 0 0 4px; font-size: 1.25rem; font-weight: 800; }
+.stay-passport header p:last-child { margin: 0; color: #667987; font-size: .84rem; }
+.stay-passport__disclosure { display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border: 1px solid #e1e9e7; border-radius: 999px; background: #fff; color: #59716f; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+.stay-passport-detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stay-passport-detail-grid > div { padding: 13px; border: 1px solid #e3ece9; border-radius: 12px; background: #fff; }
+.stay-passport-detail-grid h3 { margin: 0 0 10px; color: #315453; font-size: .83rem; font-weight: 750; }
+.stay-passport-detail-grid h3 i { margin-right: 5px; color: #087f78; }
+.stay-passport-detail-grid ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.stay-passport-detail-grid li { color: #536873; font-size: .77rem; }
+.stay-passport-detail-grid li::before { margin-right: 7px; color: #14805e; font-weight: 800; content: "✓"; }
+.stay-passport > small { display: block; margin-top: 12px; color: #78878b; font-size: .7rem; }
+.stay-passport__empty { grid-column: 1 / -1; margin: 0; padding: 14px; border-radius: 10px; background: #fff; color: #667987; font-size: .82rem; }
+
+@media (max-width: 720px) {
+  .stay-passport-filter-grid,.stay-passport-detail-grid { grid-template-columns: 1fr; }
+  .stay-passport > header { flex-direction: column; }
+  .stay-passport__disclosure { white-space: normal; }
+}

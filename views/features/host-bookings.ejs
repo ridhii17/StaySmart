@@ -1,5 +1,38 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
-<main class="smart-page"><header class="smart-hero"><div><p class="smart-eyebrow">HOST DASHBOARD</p><h1>Reservations for your places</h1><p>See guest dates, party size, status and reservation totals.</p></div><a class="smart-button smart-button--outline" href="/profile">Back to dashboard</a></header>
-  <% if (bookings.length) { %><div class="smart-booking-list"><% for (const booking of bookings) { %><article class="smart-booking"><img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>"/><div class="smart-booking__body"><p class="smart-eyebrow"><%= booking.status %> · <%= booking.listing?.title || "Place unavailable" %></p><h2><%= booking.guest?.fName || booking.guest?.username || "Guest" %></h2><p><%= booking.guest?.email || "" %></p><p><%= booking.checkIn.toLocaleDateString("en-IN") %> – <%= booking.checkOut.toLocaleDateString("en-IN") %> · <%= booking.guests %> guests</p><strong>₹<%= booking.total.toLocaleString("en-IN") %></strong></div></article><% } %></div><% } else { %><div class="smart-empty"><h2>No reservations yet</h2><p>Confirmed guest reservations for your places will appear here.</p><a class="smart-button" href="/listings/new">Add a place</a></div><% } %>
+<link rel="stylesheet" href="/css/dashboard-suite.css" />
+<% const confirmed = bookings.filter((booking) => booking.status === "confirmed"); const upcoming = confirmed.filter((booking) => booking.checkIn > new Date()); const guestTotal = confirmed.reduce((sum, booking) => sum + Number(booking.guests || 0), 0); const confirmedValue = confirmed.reduce((sum, booking) => sum + Number(booking.total || 0), 0); %>
+<main class="smart-page suite-page host-dashboard">
+  <header class="smart-hero suite-hero">
+    <div><p class="smart-eyebrow">HOST WORKSPACE</p><h1>Your reservations</h1><p>One view for upcoming arrivals, guest details, and reservation totals across your places.</p></div>
+    <div class="suite-hero__actions"><a class="smart-button smart-button--light" href="/profile"><i class="fa-solid fa-arrow-left"></i> Dashboard</a><a class="smart-button suite-button--white" href="/listings/new"><i class="fa-solid fa-plus"></i> Add a place</a></div>
+  </header>
+
+  <section class="suite-metrics" aria-label="Host reservation summary">
+    <article><span class="suite-metric-icon suite-metric-icon--teal"><i class="fa-solid fa-calendar-day"></i></span><div><small>Upcoming arrivals</small><strong><%= upcoming.length %></strong><span>confirmed bookings</span></div></article>
+    <article><span class="suite-metric-icon suite-metric-icon--blue"><i class="fa-solid fa-book-open"></i></span><div><small>Confirmed reservations</small><strong><%= confirmed.length %></strong><span>across your places</span></div></article>
+    <article><span class="suite-metric-icon suite-metric-icon--gold"><i class="fa-solid fa-user-group"></i></span><div><small>Guests expected</small><strong><%= guestTotal %></strong><span>from confirmed bookings</span></div></article>
+    <article><span class="suite-metric-icon suite-metric-icon--violet"><i class="fa-solid fa-indian-rupee-sign"></i></span><div><small>Confirmed value</small><strong>₹<%= confirmedValue.toLocaleString("en-IN") %></strong><span>reservation totals</span></div></article>
+  </section>
+
+  <section class="suite-content-panel">
+    <header class="suite-content-heading"><div><p class="smart-eyebrow">RESERVATION MANAGER</p><h2>Guest stays</h2><p>Keep arrival dates and guest details close at hand.</p></div><span class="suite-count"><%= bookings.length %> total</span></header>
+    <% if (bookings.length) { %>
+      <div class="suite-reservation-list">
+        <% for (const booking of bookings) { const isUpcoming = booking.status === "confirmed" && booking.checkIn > new Date(); const paymentLabel = booking.paymentStatus === "paid" ? "Paid" : booking.paymentStatus === "refund_pending" ? "Refund processing" : booking.paymentStatus === "refunded" ? "Refunded" : "Demo reservation"; %>
+          <article class="suite-reservation-card">
+            <a class="suite-reservation-card__image" href="/listings/<%= booking.listing?._id || '#' %>"><img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>" loading="lazy" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"/></a>
+            <div class="suite-reservation-card__main">
+              <div class="suite-reservation-card__top"><div><p class="suite-eyebrow"><%= booking.listing?.title || "Place unavailable" %></p><h3><%= booking.guest?.fName || booking.guest?.username || "Guest" %></h3></div><span class="suite-status <%= booking.status === 'confirmed' ? 'suite-status--confirmed' : 'suite-status--cancelled' %>"><i class="fa-solid <%= booking.status === 'confirmed' ? 'fa-circle-check' : 'fa-circle-xmark' %>"></i> <%= booking.status %></span></div>
+              <div class="suite-reservation-meta"><span><i class="fa-regular fa-calendar"></i> <%= booking.checkIn.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> – <%= booking.checkOut.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %></span><span><i class="fa-solid fa-user-group"></i> <%= booking.guests %> guests</span><span><i class="fa-regular fa-credit-card"></i> <%= paymentLabel %></span></div>
+              <div class="suite-reservation-card__bottom"><a href="mailto:<%= booking.guest?.email || '' %>"><i class="fa-regular fa-envelope"></i> <%= booking.guest?.email || "Guest contact unavailable" %></a><strong>₹<%= Number(booking.total || 0).toLocaleString("en-IN") %><small> total</small></strong></div>
+            </div>
+            <div class="suite-reservation-card__aside"><span class="suite-arrival <%= isUpcoming ? 'is-upcoming' : '' %>"><i class="fa-solid fa-plane-arrival"></i> <%= isUpcoming ? "Upcoming" : booking.status === "cancelled" ? "Cancelled" : "Past stay" %></span><% if (booking.listing) { %><a href="/listings/<%= booking.listing._id %>">View place <i class="fa-solid fa-arrow-up-right-from-square"></i></a><% } %></div>
+          </article>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="suite-empty"><span><i class="fa-regular fa-calendar-check"></i></span><h3>Your hosting calendar is ready</h3><p>When a traveler books one of your places, guest details and arrival dates will appear here.</p><a class="smart-button" href="/listings/new">Publish your first place</a></div>
+    <% } %>
+  </section>
 </main>

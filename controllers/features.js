@@ -241,6 +241,13 @@ module.exports.confirmBooking = async (req, res) => {
 
 module.exports.myTrips = async (req, res) => {
   const bookings = await Booking.find({ guest: req.user._id }).populate("listing").sort({ checkIn: -1 });
+  const now = Date.now();
+  bookings.sort((a, b) => {
+    const aUpcoming = a.status === "confirmed" && a.checkIn.getTime() > now;
+    const bUpcoming = b.status === "confirmed" && b.checkIn.getTime() > now;
+    if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+    return aUpcoming ? a.checkIn - b.checkIn : b.checkIn - a.checkIn;
+  });
   res.render("features/my-trips", { bookings });
 };
 
@@ -271,7 +278,14 @@ module.exports.cancelBooking = async (req, res) => {
 
 module.exports.hostBookings = async (req, res) => {
   const places = await Listing.find({ owner: req.user._id }).select("_id title image");
-  const bookings = places.length ? await Booking.find({ listing: { $in: places.map((place) => place._id) } }).populate("listing").populate("guest", "username email fName").sort({ checkIn: 1 }) : [];
+  const bookings = places.length ? await Booking.find({ listing: { $in: places.map((place) => place._id) } }).populate("listing").populate("guest", "username email fName").sort({ checkIn: -1 }) : [];
+  const now = Date.now();
+  bookings.sort((a, b) => {
+    const aUpcoming = a.status === "confirmed" && a.checkIn.getTime() > now;
+    const bUpcoming = b.status === "confirmed" && b.checkIn.getTime() > now;
+    if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+    return aUpcoming ? a.checkIn - b.checkIn : b.checkIn - a.checkIn;
+  });
   res.render("features/host-bookings", { bookings });
 };
 

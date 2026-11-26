@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema; // bar bar na likhna pve mongoose.schema
 const Review = require("./review");
+const stayPassport = require("../utils/stay-passport");
 
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -44,6 +45,9 @@ const listingSchema = new mongoose.Schema({
   propertyType: { type: String, default: "Home" },
   capacity: { type: Number, min: 1, default: 2 },
   amenities: { type: [String], default: [] },
+  travelStyles: { type: [{ type: String, enum: stayPassport.styles }], default: [] },
+  accessibilityFeatures: { type: [{ type: String, enum: stayPassport.accessibilityFeatures }], default: [] },
+  ecoPractices: { type: [{ type: String, enum: stayPassport.ecoPractices }], default: [] },
   reservationLockToken: { type: String, select: false },
   reservationLockUntil: { type: Date, select: false },
 });
@@ -71,6 +75,9 @@ listingSchema.index({ owner: 1, _id: -1 });
 listingSchema.index({ category: 1 });
 listingSchema.index({ amenities: 1, price: 1 });
 listingSchema.index({ propertyType: 1, price: 1 });
+listingSchema.index({ travelStyles: 1 });
+listingSchema.index({ accessibilityFeatures: 1 });
+listingSchema.index({ ecoPractices: 1 });
 
 const Listing = mongoose.model("Listing", listingSchema);
 module.exports = Listing;

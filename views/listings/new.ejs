@@ -1,5 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/property-form.css" />
+<link rel="stylesheet" href="/css/stay-passport.css" />
 
 <main class="property-form-page">
   <header class="property-form-heading">
@@ -66,6 +67,11 @@
         <div class="property-field"><label for="capacity" class="form-label">Guest capacity</label><input class="form-control" id="capacity" name="listing[capacity]" type="number" min="1" max="30" value="2" required /></div>
       </div>
       <fieldset class="property-field property-amenities"><legend class="form-label">Amenities</legend><div><% for (const amenity of ["Wi-Fi","Kitchen","Workspace","Heating","Air conditioning","Washer","Parking","Pool","Public transport"]) { %><label><input type="checkbox" name="listing[amenities]" value="<%= amenity %>" /> <%= amenity %></label><% } %></div></fieldset>
+      <details class="property-field property-stay-passport"><summary>Build your Stay Passport <span>Help guests find a stay that fits how they travel</span></summary><p>Only select details that accurately describe your place. Accessibility and eco details are shared by the host and aren’t independently verified.</p>
+        <fieldset><legend>Great for</legend><div><% for (const item of stayPassport.styles) { %><label><input type="checkbox" name="listing[travelStyles]" value="<%= item %>" /> <%= item %></label><% } %></div></fieldset>
+        <fieldset><legend>Accessibility details</legend><div><% for (const item of stayPassport.accessibilityFeatures) { %><label><input type="checkbox" name="listing[accessibilityFeatures]" value="<%= item %>" /> <%= item %></label><% } %></div></fieldset>
+        <fieldset><legend>Eco practices</legend><div><% for (const item of stayPassport.ecoPractices) { %><label><input type="checkbox" name="listing[ecoPractices]" value="<%= item %>" /> <%= item %></label><% } %></div></fieldset>
+      </details>
 
       <div class="property-field">
         <label for="description" class="form-label">About this place</label>

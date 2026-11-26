@@ -1,6 +1,7 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
-<main class="smart-page">
+<link rel="stylesheet" href="/css/dashboard-suite.css" />
+<main class="smart-page suite-page smart-picks-dashboard">
   <header class="smart-hero"><div><p class="smart-eyebrow">STAYSMART RECOMMENDATIONS</p><h1>Find smarter stays.</h1><p>Personalized matches with a clear reason behind every recommendation.</p></div></header>
   <form class="smart-search-panel" action="/smart-picks" method="GET">
     <label>Destination<input name="destination" value="<%= preferences.destination %>" placeholder="City or region" /></label>

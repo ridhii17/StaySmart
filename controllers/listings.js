@@ -3,6 +3,7 @@ const Listing = require("../models/listing");
 const Booking = require("../models/booking");
 const { getTrustScore, scoreListing } = require("../utils/stay-smart");
 const { parseDateOnly, todayDateOnly } = require("../utils/date-only");
+const stayPassport = require("../utils/stay-passport");
 const textQuery = (value) => typeof value === "string" ? value.trim().slice(0, 80) : "";
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function decorateListings(listings, user) {
@@ -13,7 +14,7 @@ function decorateListings(listings, user) {
 }
 
 module.exports.index = async (req, res) => {
-  const { destination: rawDestination = "", checkIn: rawCheckIn = "", checkOut: rawCheckOut = "", guests = "", minPrice: rawMinPrice = "", maxPrice: rawMaxPrice = "", propertyType: rawPropertyType = "", amenities = "", page = "1" } = req.query;
+  const { destination: rawDestination = "", checkIn: rawCheckIn = "", checkOut: rawCheckOut = "", guests = "", minPrice: rawMinPrice = "", maxPrice: rawMaxPrice = "", propertyType: rawPropertyType = "", amenities = "", travelStyles = "", accessibilityFeatures = "", ecoPractices = "", page = "1" } = req.query;
   const destination = textQuery(rawDestination);
   const checkIn = textQuery(rawCheckIn);
   const checkOut = textQuery(rawCheckOut);
@@ -42,6 +43,12 @@ module.exports.index = async (req, res) => {
   if (Object.keys(price).length) query.price = price;
   const selectedAmenities = (Array.isArray(amenities) ? amenities : typeof amenities === "string" && amenities ? [amenities] : []).filter((item) => typeof item === "string").slice(0, 20);
   if (selectedAmenities.length) query.amenities = { $all: selectedAmenities };
+  const selectedStyles = stayPassport.selectedValues(travelStyles, stayPassport.styles);
+  const selectedAccessibility = stayPassport.selectedValues(accessibilityFeatures, stayPassport.accessibilityFeatures);
+  const selectedEco = stayPassport.selectedValues(ecoPractices, stayPassport.ecoPractices);
+  if (selectedStyles.length) query.travelStyles = { $all: selectedStyles };
+  if (selectedAccessibility.length) query.accessibilityFeatures = { $all: selectedAccessibility };
+  if (selectedEco.length) query.ecoPractices = { $all: selectedEco };
   const parsedPage = Math.max(1, Math.min(1000, parseInt(page, 10) || 1));
   const pageSize = 9;
   const checkInDate = parseDateOnly(checkIn);
@@ -62,7 +69,7 @@ module.exports.index = async (req, res) => {
     listing.matchScore = scoreListing(listing, { destination, budget: maxPrice, guests: guests || 1, amenities: selectedAmenities }).score;
     listing.isSaved = Boolean(req.user?.savedListings?.some((id) => id.equals(listing._id)));
   }
-  res.render("listings/index", { listings, search: { destination, checkIn, checkOut, guests, minPrice, maxPrice, propertyType, amenities: selectedAmenities }, page: parsedPage, pageCount: Math.ceil(count / pageSize), totalCount: count });
+  res.render("listings/index", { listings, search: { destination, checkIn, checkOut, guests, minPrice, maxPrice, propertyType, amenities: selectedAmenities, travelStyles: selectedStyles, accessibilityFeatures: selectedAccessibility, ecoPractices: selectedEco }, page: parsedPage, pageCount: Math.ceil(count / pageSize), totalCount: count });
 };
 
 module.exports.renderNewForm = (req, res) => {
@@ -108,6 +115,9 @@ module.exports.createListing = async (req, res, next) => {
     //Create listing first
     const listingDetails = { ...req.body.listing };
     listingDetails.amenities = Array.isArray(listingDetails.amenities) ? listingDetails.amenities : listingDetails.amenities ? [listingDetails.amenities] : [];
+    listingDetails.travelStyles = stayPassport.selectedValues(listingDetails.travelStyles, stayPassport.styles);
+    listingDetails.accessibilityFeatures = stayPassport.selectedValues(listingDetails.accessibilityFeatures, stayPassport.accessibilityFeatures);
+    listingDetails.ecoPractices = stayPassport.selectedValues(listingDetails.ecoPractices, stayPassport.ecoPractices);
     const newListing = new Listing(listingDetails);
     //Get uploaded image
     const coverPhoto = req.files?.["listing[image]"]?.[0];
@@ -172,6 +182,9 @@ module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
   const updates = { ...req.body.listing };
   updates.amenities = Array.isArray(updates.amenities) ? updates.amenities : updates.amenities ? [updates.amenities] : [];
+  updates.travelStyles = stayPassport.selectedValues(updates.travelStyles, stayPassport.styles);
+  updates.accessibilityFeatures = stayPassport.selectedValues(updates.accessibilityFeatures, stayPassport.accessibilityFeatures);
+  updates.ecoPractices = stayPassport.selectedValues(updates.ecoPractices, stayPassport.ecoPractices);
   let listing = await Listing.findByIdAndUpdate(id, { ...updates }, { new: true, runValidators: true });
   if (!listing) return res.status(404).render("listings/error", { statusCode: 404, message: "This place could not be found." });
 

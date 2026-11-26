@@ -1,6 +1,7 @@
 <% layout('layouts/boilerplate') -%>
 <link rel="stylesheet" href="/css/filter.css" />
 <link rel="stylesheet" href="/css/listings-page.css" />
+<link rel="stylesheet" href="/css/stay-passport.css" />
 <div class="filters-main">
   <div id="filters">
     <div class="left_img_button" id="slideButton" style="display: none">
@@ -338,6 +339,11 @@
     <label>Property type<select name="propertyType"><option value="">Any type</option><% for (const type of ["Home","Apartment","Cabin","Guesthouse","Villa","Room","Hostel"]) { %><option value="<%= type %>" <%= search.propertyType === type ? "selected" : "" %>><%= type %></option><% } %></select></label>
     <button type="submit"><i class="fa-solid fa-sliders"></i> Search stays</button>
     <fieldset class="stay-amenity-filters"><legend>Amenities</legend><% for (const amenity of ["Wi-Fi","Kitchen","Workspace","Parking","Pool"]) { %><label><input type="checkbox" name="amenities" value="<%= amenity %>" <%= search.amenities.includes(amenity) ? "checked" : "" %> /> <%= amenity %></label><% } %></fieldset>
+    <details class="stay-passport-filter-panel"><summary><i class="fa-solid fa-compass"></i> Stay Passport <span>Find a place that fits your travel style, access needs, or values</span></summary><div class="stay-passport-filter-grid">
+      <fieldset><legend>Great for</legend><% for (const item of stayPassport.styles) { %><label><input type="checkbox" name="travelStyles" value="<%= item %>" <%= search.travelStyles.includes(item) ? "checked" : "" %> /> <%= item %></label><% } %></fieldset>
+      <fieldset><legend>Accessibility</legend><% for (const item of stayPassport.accessibilityFeatures) { %><label><input type="checkbox" name="accessibilityFeatures" value="<%= item %>" <%= search.accessibilityFeatures.includes(item) ? "checked" : "" %> /> <%= item %></label><% } %></fieldset>
+      <fieldset><legend>Eco practices</legend><% for (const item of stayPassport.ecoPractices) { %><label><input type="checkbox" name="ecoPractices" value="<%= item %>" <%= search.ecoPractices.includes(item) ? "checked" : "" %> /> <%= item %></label><% } %></fieldset>
+    </div><small>Accessibility and eco details are shared by hosts and aren’t independently verified.</small></details>
   </form>
   <div class="stay-search-meta"><span><%= totalCount %> matching places</span><% if (currentUser) { %><span class="compare-selection" id="compareSelection">Select up to 4 places to compare <a href="/compare" id="compareLink">Compare now</a></span><% } %></div>
 
@@ -351,6 +357,7 @@
         const cardAverageRating = reviewRatings.length
           ? (reviewRatings.reduce((sum, rating) => sum + rating, 0) / reviewRatings.length).toFixed(1)
           : null;
+        const passportPreview = [...(listing.travelStyles || []), ...(listing.accessibilityFeatures || []), ...(listing.ecoPractices || [])].slice(0, 2);
       %>
         <article class="stay-card">
           <div class="stay-card__tools">
@@ -394,6 +401,7 @@
               </div>
               <h2 class="stay-card__title"><%= listing.title %></h2>
               <% if (listing.owner?.hostVerificationStatus === "verified") { %><span class="stay-card__verified-host"><i class="fa-solid fa-circle-check"></i> Verified host</span><% } %>
+              <% if (passportPreview.length) { %><div class="stay-card__passport"><% for (const item of passportPreview) { %><span><%= item %></span><% } %></div><% } %>
               <p class="stay-card__description"><%= listing.description %></p>
               <div class="stay-card__footer">
                 <p class="stay-card__price">
@@ -416,7 +424,8 @@
     </div>
   <% } %>
   <% const amenitiesQuery = search.amenities.map((amenity) => `&amenities=${encodeURIComponent(amenity)}`).join(""); %>
-  <% if (pageCount > 1) { %><nav class="stay-pagination" aria-label="Explore pages"><% if (page > 1) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %>&page=<%= page - 1 %>">← Previous</a><% } %><span>Page <%= page %> of <%= pageCount %></span><% if (page < pageCount) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %>&page=<%= page + 1 %>">Next →</a><% } %></nav><% } %>
+  <% const passportQuery = [...search.travelStyles.map((item) => `&travelStyles=${encodeURIComponent(item)}`), ...search.accessibilityFeatures.map((item) => `&accessibilityFeatures=${encodeURIComponent(item)}`), ...search.ecoPractices.map((item) => `&ecoPractices=${encodeURIComponent(item)}`)].join(""); %>
+  <% if (pageCount > 1) { %><nav class="stay-pagination" aria-label="Explore pages"><% if (page > 1) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %><%= passportQuery %>&page=<%= page - 1 %>">← Previous</a><% } %><span>Page <%= page %> of <%= pageCount %></span><% if (page < pageCount) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %><%= passportQuery %>&page=<%= page + 1 %>">Next →</a><% } %></nav><% } %>
 </section>
 
  <script defer src="/js/filter.js"></script>

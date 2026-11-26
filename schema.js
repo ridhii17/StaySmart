@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const stayPassport = require("./utils/stay-passport");
 
 module.exports.listingSchema = Joi.object({
   listing: Joi.object({
@@ -12,6 +13,9 @@ module.exports.listingSchema = Joi.object({
     propertyType: Joi.string().max(50).allow(""),
     capacity: Joi.number().integer().min(1).max(30),
     amenities: Joi.array().items(Joi.string().max(50)).max(30).single(),
+    travelStyles: Joi.array().items(Joi.string().valid(...stayPassport.styles)).max(stayPassport.styles.length).single(),
+    accessibilityFeatures: Joi.array().items(Joi.string().valid(...stayPassport.accessibilityFeatures)).max(stayPassport.accessibilityFeatures.length).single(),
+    ecoPractices: Joi.array().items(Joi.string().valid(...stayPassport.ecoPractices)).max(stayPassport.ecoPractices.length).single(),
     gallery: Joi.allow("", null),
   }).required(),
 });

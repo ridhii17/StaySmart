@@ -199,6 +199,9 @@ async function prepareListings(host) {
     if (JSON.stringify(categories) !== JSON.stringify(listing.category || [])) { listing.category = categories; changed = true; }
     const amenities = inferAmenities({ ...source, amenities: listing.amenities?.length ? listing.amenities : source.amenities });
     if (JSON.stringify(amenities) !== JSON.stringify(listing.amenities || [])) { listing.amenities = amenities; changed = true; }
+    for (const field of ["travelStyles", "accessibilityFeatures", "ecoPractices"]) {
+      if (!listing[field]?.length && source[field]?.length) { listing[field] = source[field]; changed = true; }
+    }
     if (!listing.geometry?.coordinates?.length) {
       const coords = source.geometry?.coordinates || coordinatesByLocation[String(listing.location || "").toLowerCase()];
       if (coords) { listing.geometry = { type: "Point", coordinates: coords }; changed = true; }

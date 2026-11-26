@@ -10,6 +10,8 @@ module.exports = [
     propertyType: "Apartment",
     capacity: 3,
     amenities: ["Wi-Fi", "Kitchen", "Workspace", "Public transport", "Parking"],
+    travelStyles: ["Remote-work ready", "Long-stay friendly"],
+    accessibilityFeatures: ["Step-free entrance", "Elevator access"],
     geometry: { type: "Point", coordinates: [73.8567, 18.5204] },
   },
   {
@@ -23,6 +25,7 @@ module.exports = [
     propertyType: "Apartment",
     capacity: 2,
     amenities: ["Wi-Fi", "Kitchen", "Workspace", "Public transport"],
+    travelStyles: ["Remote-work ready", "Long-stay friendly"],
     geometry: { type: "Point", coordinates: [77.5946, 12.9716] },
   },
   {
@@ -101,6 +104,7 @@ module.exports = [
     propertyType: "Villa",
     capacity: 6,
     amenities: ["Wi-Fi", "Kitchen", "Pool", "Parking"],
+    travelStyles: ["Family friendly", "Couples retreat"],
     geometry: { type: "Point", coordinates: [73.8278, 15.2993] },
   },
   {
@@ -114,6 +118,8 @@ module.exports = [
     propertyType: "Cabin",
     capacity: 3,
     amenities: ["Wi-Fi", "Parking", "Breakfast"],
+    travelStyles: ["Outdoor escape"],
+    ecoPractices: ["Solar power", "Waste sorting"],
     geometry: { type: "Point", coordinates: [76.132, 11.6854] },
   },
 ];

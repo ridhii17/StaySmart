@@ -28,6 +28,7 @@ const verificationRouter = require("./routes/verification.js");
 const paymentController = require("./controllers/payments");
 const wrapAsync = require("./utils/wrapAsync");
 const { rateLimit } = require("./middleware");
+app.locals.stayPassport = require("./utils/stay-passport");
 
 app.disable("x-powered-by");
 if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
@@ -125,7 +126,7 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
-  res.locals.search = { destination: "", checkIn: "", checkOut: "", guests: "", minPrice: "", maxPrice: "", propertyType: "", amenities: [] };
+  res.locals.search = { destination: "", checkIn: "", checkOut: "", guests: "", minPrice: "", maxPrice: "", propertyType: "", amenities: [], travelStyles: [], accessibilityFeatures: [], ecoPractices: [] };
   res.locals.totalCount = 0;
   res.locals.page = 1;
   res.locals.pageCount = 1;

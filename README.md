@@ -80,6 +80,7 @@ New demo accounts use `StaySmartDemo2026!` by default. Set `DEMO_SEED_PASSWORD` 
 
 - Explore stays with destination, date, guest, price, property-type, and amenity filters
 - Listing pages with photos, reviews, host details, and nearby-place discovery
+- Stay Passport filters for travel style, accessibility details, and host-shared eco practices
 - Host listing creation and editing, image uploads, and review management
 - Guest reviews and ratings on stays
 - Smart stay recommendations and a student-budget search
@@ -131,6 +132,11 @@ See the [Razorpay web integration guide](https://razorpay.com/docs/payments/paym
 
 - The booking page refreshes availability every 15 seconds while visible, then the server checks again before checkout and reservation creation. This is near-real-time polling; open pages do not receive push updates.
 - Hosts can request manual profile verification at `/host/verification`. Set `VERIFICATION_ADMIN_EMAIL` to the exact email of the reviewer account; that signed-in account can review requests at `/admin/host-verifications`. Approval adds a verified badge. This is manual review, not automated identity or government-ID verification.
+
+### Stay Passport
+
+- Hosts can add travel-style tags, accessibility details, and eco practices to each stay. Travelers can filter Explore by these tags and see them on place cards and detail pages.
+- Accessibility and eco claims are host-reported and aren’t independently verified. A few sample listings include illustrative tags for the demo; confirm these details with the host before relying on them.
 
 ### Security, deployment, and remaining service requirements
 

@@ -7,6 +7,7 @@
     <p class="smart-muted"><i class="fa-solid fa-location-dot"></i> <%= [listing.location, listing.country].filter(Boolean).join(", ") %></p>
     <h3><a href="/listings/<%= listing._id %>"><%= listing.title %></a></h3>
     <% if (listing.owner?.hostVerificationStatus === "verified") { %><span class="host-verified-badge"><i class="fa-solid fa-circle-check"></i> Verified host</span><% } %>
+    <% const passportPreview = [...(listing.travelStyles || []), ...(listing.accessibilityFeatures || []), ...(listing.ecoPractices || [])].slice(0, 2); if (passportPreview.length) { %><div class="stay-card__passport"><% for (const item of passportPreview) { %><span><%= item %></span><% } %></div><% } %>
     <p class="smart-muted"><%= listing.propertyType || "Home" %> · Up to <%= listing.capacity || 2 %> guests</p>
     <p class="smart-price">₹<%= Number(listing.price || 0).toLocaleString("en-IN") %> <small>/ night</small></p>
     <% if (typeof score !== "undefined") { %>

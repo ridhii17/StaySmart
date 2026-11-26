@@ -1,5 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/profile-dashboard.css" />
+<link rel="stylesheet" href="/css/dashboard-suite.css" />
 <link rel="stylesheet" href="/css/delete-confirm.css" />
 
 <%
@@ -89,9 +90,13 @@
       <span class="dashboard-stat-icon dashboard-stat-icon--reviews"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i></span>
       <div><span>Reviews shared</span><strong><%= allReview.length %></strong></div>
     </article>
-    <article class="dashboard-stat-card dashboard-stat-card--tip">
-      <span class="dashboard-stat-icon dashboard-stat-icon--tip"><i class="fa-regular fa-lightbulb" aria-hidden="true"></i></span>
-      <div><span>Quick tip</span><strong>Fresh photos help your place stand out.</strong></div>
+    <article class="dashboard-stat-card">
+      <span class="dashboard-stat-icon dashboard-stat-icon--places"><i class="fa-solid fa-suitcase-rolling" aria-hidden="true"></i></span>
+      <div><span>Guest reservations</span><strong><%= bookingCount %></strong></div>
+    </article>
+    <article class="dashboard-stat-card">
+      <span class="dashboard-stat-icon dashboard-stat-icon--reviews"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></span>
+      <div><span>Host reservations</span><strong><%= hostReservations %></strong></div>
     </article>
   </section>
 
