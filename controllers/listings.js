@@ -2,6 +2,7 @@ const axios = require("axios");
 const Listing = require("../models/listing");
 const Booking = require("../models/booking");
 const { getTrustScore, scoreListing } = require("../utils/stay-smart");
+const { parseDateOnly, todayDateOnly } = require("../utils/date-only");
 const textQuery = (value) => typeof value === "string" ? value.trim().slice(0, 80) : "";
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function decorateListings(listings, user) {
@@ -43,15 +44,10 @@ module.exports.index = async (req, res) => {
   if (selectedAmenities.length) query.amenities = { $all: selectedAmenities };
   const parsedPage = Math.max(1, Math.min(1000, parseInt(page, 10) || 1));
   const pageSize = 9;
-  const isDateOnly = (value) => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-    const date = new Date(`${value}T00:00:00`);
-    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
-  };
-  const validDates = checkIn && checkOut && isDateOnly(checkIn) && isDateOnly(checkOut);
-  const checkInDate = validDates ? new Date(`${checkIn}T00:00:00`) : null;
-  const checkOutDate = validDates ? new Date(`${checkOut}T00:00:00`) : null;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const checkInDate = parseDateOnly(checkIn);
+  const checkOutDate = parseDateOnly(checkOut);
+  const validDates = Boolean(checkInDate && checkOutDate);
+  const today = todayDateOnly();
   if ((checkIn || checkOut) && (!validDates || checkInDate < today || checkOutDate <= checkInDate)) {
     req.flash("error", "Choose a future check-in date and a later check-out date.");
   } else if (validDates) {

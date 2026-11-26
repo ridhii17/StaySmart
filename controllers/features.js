@@ -8,17 +8,13 @@ const { withReservationLock, availabilityFilter, isAvailable } = require("../uti
 const paymentsController = require("./payments");
 const aiRecommendations = require("../utils/ai-recommendations");
 const { calculatePrice, getTrustScore, scoreListing } = require("../utils/stay-smart");
+const { parseDateOnly, todayDateOnly } = require("../utils/date-only");
 
 const validId = (id) => mongoose.Types.ObjectId.isValid(id);
 const getListing = (id) => Listing.findById(id).populate("owner").populate("reviews", "rating");
 const tripDuration = (trip) => trip.startDate && trip.endDate
   ? Math.max(1, Math.ceil((new Date(trip.endDate) - new Date(trip.startDate)) / 86400000))
   : 1;
-function parseDateOnly(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const parsed = new Date(`${value}T00:00:00`);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value ? parsed : null;
-}
 function bookingUrl(listingId, checkIn, checkOut, guests) {
   const params = new URLSearchParams({ checkIn: String(checkIn || ""), checkOut: String(checkOut || ""), guests: String(guests || 1) });
   return `/bookings/new/${listingId}?${params}`;
@@ -164,8 +160,7 @@ module.exports.checkAvailability = async (req, res) => {
   if (!listing) return res.status(404).json({ error: "Stay not found." });
   const checkIn = parseDateOnly(req.query.checkIn);
   const checkOut = parseDateOnly(req.query.checkOut);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = todayDateOnly();
   if (!checkIn || !checkOut || checkIn < today || checkOut <= checkIn || (checkOut - checkIn) / 86400000 > 365) {
     return res.status(400).json({ error: "Choose a future check-in and a later check-out date." });
   }
@@ -181,14 +176,19 @@ module.exports.checkout = async (req, res) => {
   const checkIn = parseDateOnly(req.body.checkIn);
   const checkOut = parseDateOnly(req.body.checkOut);
   const guests = Number(req.body.guests);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = todayDateOnly();
   const price = checkIn && checkOut ? calculatePrice(listing.price, checkIn, checkOut) : null;
-  if (!checkIn || !checkOut || checkIn < today || (checkOut - checkIn) / 86400000 > 365 || !price || !Number.isInteger(guests) || guests < 1 || guests > (listing.capacity || 2)) {
-    req.flash("error", "Choose valid dates and a guest count this place can host.");
+  if (!checkIn || !checkOut || checkIn < today || checkOut <= checkIn || (checkOut - checkIn) / 86400000 > 365 || !price) {
+    req.flash("error", "Choose a future check-in date and a later check-out date.");
+    return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
+  }
+  const maxGuests = Number(listing.capacity) > 0 ? Number(listing.capacity) : 2;
+  if (!Number.isInteger(guests) || guests < 1 || guests > maxGuests) {
+    req.flash("error", `This stay can host up to ${maxGuests} guests. Choose a guest count from 1 to ${maxGuests}.`);
     return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
   }
   const check = await withReservationLock(listing._id, () => Booking.exists(availabilityFilter(listing._id, checkIn, checkOut)));
-  if (check.busy) {
+  if (check?.busy) {
     req.flash("error", "Availability is being updated. Please try once more.");
     return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
   }
