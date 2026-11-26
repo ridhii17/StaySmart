@@ -1,0 +1,337 @@
+.stays-results {
+  max-width: 1440px;
+  margin: 1.8rem auto 4rem;
+  padding: 0 0.15rem;
+  color: #202934;
+}
+
+.stays-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 0.5rem 0 1.65rem;
+}
+
+.stays-eyebrow {
+  margin: 0 0 0.55rem;
+  color: #b14c43;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.stays-intro h1 {
+  margin: 0;
+  color: #202934;
+  font-size: clamp(1.8rem, 3.1vw, 2.65rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1.12;
+}
+
+.stays-intro__description {
+  max-width: 580px;
+  margin: 0.7rem 0 0;
+  color: #68717c;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.stays-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.15rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ebe7e2;
+  border-radius: 999px;
+  background: #fff;
+  color: #626b76;
+  font-size: 0.84rem;
+  box-shadow: 0 4px 14px rgba(31, 41, 55, 0.035);
+}
+
+.stays-count i {
+  color: #c34f44;
+}
+
+.stays-count strong {
+  color: #202934;
+  font-weight: 800;
+}
+
+.stay-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.8rem 1.35rem;
+}
+
+.stay-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #ece9e5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(31, 41, 55, 0.045);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.stay-card:hover {
+  transform: translateY(-4px);
+  border-color: #ded8d0;
+  box-shadow: 0 16px 35px rgba(31, 41, 55, 0.11);
+}
+
+.stay-card__link {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.stay-card__link:hover {
+  color: inherit;
+}
+
+.stay-card__media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.42 / 1;
+  background: #f0eeeb;
+}
+
+.stay-card__media::after {
+  position: absolute;
+  inset: 45% 0 0;
+  background: linear-gradient(180deg, transparent, rgba(19, 27, 35, 0.19));
+  content: "";
+  pointer-events: none;
+}
+
+.stay-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 420ms cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+
+.stay-card:hover .stay-card__media img {
+  transform: scale(1.035);
+}
+
+.stay-card__category {
+  position: absolute;
+  z-index: 1;
+  top: 0.85rem;
+  left: 0.85rem;
+  max-width: calc(100% - 1.7rem);
+  overflow: hidden;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #38424d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(20, 25, 31, 0.08);
+}
+
+.stay-card__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem 1.05rem 1.05rem;
+}
+
+.stay-card__location {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.42rem;
+  color: #77808b;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.stay-card__location i {
+  flex: 0 0 auto;
+  color: #c34f44;
+  font-size: 0.74rem;
+}
+
+.stay-card__location span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stay-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.55rem 0 0;
+  color: #202934;
+  font-size: 1.09rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.stay-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 2.9em;
+  margin: 0.45rem 0 1rem;
+  color: #717a85;
+  font-size: 0.84rem;
+  line-height: 1.48;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.stay-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid #f0eeeb;
+}
+
+.stay-card__price {
+  margin: 0;
+  color: #202934;
+  white-space: nowrap;
+}
+
+.stay-card__price strong {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.stay-card__price span {
+  color: #838a93;
+  font-size: 0.76rem;
+}
+
+.stay-card__view {
+  color: #ab493f;
+  font-size: 0.77rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stay-card__view i {
+  margin-left: 0.25rem;
+  font-size: 0.67rem;
+  transition: transform 160ms ease;
+}
+
+.stay-card:hover .stay-card__view i {
+  transform: translateX(3px);
+}
+
+.stays-empty {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 1px solid #eee9e4;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff 0%, #faf8f5 100%);
+  text-align: center;
+}
+
+.stays-empty__icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  margin-bottom: 1rem;
+  border-radius: 18px;
+  background: #fff0ed;
+  color: #c34f44;
+  font-size: 1.25rem;
+}
+
+.stays-empty h2 {
+  margin: 0;
+  color: #202934;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.stays-empty p {
+  margin: 0.55rem 0 1.1rem;
+  color: #737b85;
+}
+
+.stays-empty__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.72rem 1.05rem;
+  border-radius: 999px;
+  background: #202934;
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.stays-empty__button:hover {
+  background: #111827;
+  color: #fff;
+}
+
+@media (max-width: 991px) {
+  .stay-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .stays-results {
+    margin-top: 1.1rem;
+  }
+
+  .stays-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .stays-intro h1 {
+    max-width: 14ch;
+    font-size: 1.9rem;
+  }
+
+  .stays-intro__description {
+    font-size: 0.9rem;
+  }
+
+  .stays-count {
+    padding: 0.62rem 0.85rem;
+  }
+
+  .stay-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .stay-card__media {
+    aspect-ratio: 1.55 / 1;
+  }
+}

@@ -76,7 +76,7 @@
             </div>
             <div class="choose-list">
                 <div>
-                    <label for="listBtn"><b>Listings</b></label>
+                    <label for="listBtn"><b>Your places</b></label>
                     <input type="radio" name="listing" id="listBtn" checked>
                 </div>
                 <div>
@@ -150,21 +150,19 @@
         </div>
 
 
-        <!-- listings show -->
+        <!-- places you host -->
         <hr>
         <div id="listing-box">
             <div class="listing-count">
-                <h3 class="index-res">@<%= currentUser.username %> Created&nbsp;<b class="text-success fs-4">
-                            <%= allListing.length %>
-                        </b>&nbsp;Listings</h3>
+                <h3 class="index-res">Your places <span class="text-success fs-4"><%= allListing.length %></span></h3>
                 <form method="post" action="/profile/all-listings-delete/<%= currentUser._id %>?_method=DELETE"
                     class="needs-validation">
-                    <a href="/listings/new" class="deleteAll create-list">Create Li..</a>
+                    <a href="/listings/new" class="deleteAll create-list">Add a place</a>
                     <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
->Delete All</button>
+>Remove all</button>
                     <div class="fnx-fixed-dis">
                         <div class="delete-fnx" style="display: none;">
-                            <p>Are you sure you want to delete the entire listings?</p>
+                            <p>Are you sure you want to remove all your places?</p>
                             <div class="conf cancle-confirm">Cancel</div>
                             <button class="conf delete-confirm">Confirm</button>
                         </div>
@@ -177,7 +175,7 @@
                         <div class="card col listing-card index-res">
                             <div class="index-res-img">
                                 <div class="card-img">
-                                    <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" />
+                                    <img src="<%= listing.image && listing.image.url ? listing.image.url : '/Icon/listing-img-pre.png' %>" class="card-img-top" alt="<%= listing.title %>" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';" />
                                 </div>
                                 <div class="card-body mt-1 ms-2">
                                     <p class="card-text" style="display: block;">
@@ -189,7 +187,7 @@
                                 </div>
                                 <div class="lists-btn mt-1">
                                     <button class="list-btn list-show"><a
-                                            href="/listings/<%= listing._id %>">Show</a></button>
+                                            href="/listings/<%= listing._id %>">View</a></button>
                                     <form method="post" action="/profile/listing/<%= listing._id %>?_method=DELETE"
                                         class="needs-validation">
                                         <button type="reset" class="list-btn list-delete"
@@ -197,7 +195,7 @@
 >Delete</button>
                                         <div class="fnx-fixed-dis">
                                             <div class="delete-fnx" style="display: none;">
-                                                <p>I want to delete this listing.</p>
+                                                <p>Remove this place?</p>
                                                 <p>"<%= listing.title %>"</p>
                                                 <div class="conf cancle-confirm">Cancel</div>
                                                 <button class="conf delete-confirm">Confirm</button>

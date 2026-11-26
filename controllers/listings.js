@@ -21,7 +21,7 @@ module.exports.showListing = async (req, res) => {
     })
     .populate("owner");
   if (!listing) {
-    req.flash("error", "Listing not found.");
+    req.flash("error", "This place could not be found.");
     res.redirect("/listings");
   }
   res.render("listings/show", { listing });
@@ -57,7 +57,7 @@ module.exports.createListing = async (req, res, next) => {
 
     const result = geoRes.data.results[0];
     if (!result) {
-      req.flash("error", "Location not found on map!");
+      req.flash("error", "We couldn't find that location. Try adding a nearby city.");
       return res.redirect("/listings/new");
     }
     //Now add geometry
@@ -69,7 +69,7 @@ module.exports.createListing = async (req, res, next) => {
     // Save
     await newListing.save();
 
-    req.flash("success", "Successfully created a new listing!");
+    req.flash("success", "Your place is now live.");
     res.redirect("/listings");
   } catch (err) {
     next(err);
@@ -80,7 +80,7 @@ module.exports.renderEditForm = async (req, res) => {
   let { id } = req.params;
   const listing = await Listing.findById(id);
   if (!listing) {
-    req.flash("error", "Listing not found.");
+    req.flash("error", "This place could not be found.");
     res.redirect("/listings");
     // return res.redirect("/listings");
   }
@@ -100,14 +100,14 @@ module.exports.updateListing = async (req, res) => {
     await listing.save();
   }
 
-  req.flash("success", "Listing updated!");
+  req.flash("success", "Your changes have been saved.");
   res.redirect(`/listings/${id}`); // redirect to show page
 };
 
 module.exports.destroyListing = async (req, res) => {
   let { id } = req.params;
   await Listing.findByIdAndDelete(id);
-  req.flash("success", "Listing deleted!");
+  req.flash("success", "Your place has been removed.");
   res.redirect("/listings");
 };
 
@@ -118,10 +118,10 @@ module.exports.filter = async (req, res, next) => {
   let listings = await Listing.find({ category: { $all: [id] } });
   console.log(listings);
   if (listings.length != 0) {
-    res.locals.success = `Listings Find by ${id}`;
-    res.render("listings/index.ejs", { allListing: listings });
+    res.locals.success = `Showing stays in ${id}`;
+    res.render("listings/index.ejs", { listings });
   } else {
-    req.flash("error", "Listings is not here !!!");
+    req.flash("error", "No stays match this category yet.");
     res.redirect("/listings");
   }
 };
@@ -136,8 +136,8 @@ module.exports.search = async (req, res) => {
   console.log(input);
   if (input == "" || input == " ") {
     //search value empty
-    req.flash("error", "Search value empty !!!");
-    res.redirect("/listings");
+    req.flash("error", "Enter a destination or property name to search.");
+    return res.redirect("/listings");
   }
 
   // convert every word 1st latter capital and other small---------------
@@ -158,8 +158,8 @@ module.exports.search = async (req, res) => {
     title: { $regex: element, $options: "i" },
   });
   if (listings.length != 0) {
-    res.locals.success = "Listings searched by Title";
-    res.render("listings/index.ejs", { allListing: listings });
+    res.locals.success = `Showing stays matching “${element}”`;
+    res.render("listings/index.ejs", { listings });
     return;
   }
   if (listings.length == 0) {
@@ -167,8 +167,8 @@ module.exports.search = async (req, res) => {
       category: { $regex: element, $options: "i" },
     }).sort({ _id: -1 });
     if (listings.length != 0) {
-      res.locals.success = "Listings searched by Category";
-      res.render("listings/index.ejs", { allListing: listings });
+      res.locals.success = `Showing stays matching “${element}”`;
+      res.render("listings/index.ejs", { listings });
       return;
     }
   }
@@ -177,8 +177,8 @@ module.exports.search = async (req, res) => {
       country: { $regex: element, $options: "i" },
     }).sort({ _id: -1 });
     if (listings.length != 0) {
-      res.locals.success = "Listings searched by Country";
-      res.render("listings/index.ejs", { allListing: listings });
+      res.locals.success = `Showing stays matching “${element}”`;
+      res.render("listings/index.ejs", { listings });
       return;
     }
   }
@@ -187,8 +187,8 @@ module.exports.search = async (req, res) => {
       location: { $regex: element, $options: "i" },
     }).sort({ _id: -1 });
     if (listings.length != 0) {
-      res.locals.success = "Listings searched by Location";
-      res.render("listings/index.ejs", { allListing: listings });
+      res.locals.success = `Showing stays matching “${element}”`;
+      res.render("listings/index.ejs", { listings });
       return;
     }
   }
@@ -200,13 +200,13 @@ module.exports.search = async (req, res) => {
       price: 1,
     });
     if (listings.length != 0) {
-      res.locals.success = `Listings searched for less than Rs ${element}`;
+      res.locals.success = `Showing stays under ₹${element}`;
       res.render("listings/index.ejs", { listings: listings });
       return;
     }
   }
   if (listings.length == 0) {
-    req.flash("error", "Listings is not here !!!");
+    req.flash("error", "No stays match your search. Try another destination.");
     res.redirect("/listings");
   }
 };

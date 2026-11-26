@@ -1,14 +1,12 @@
 <link rel="stylesheet" href="/css/navbar.css" />
 
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-
-    <!-- Logo -->
-    <a class="navbar-brand" href="/listings">
-      <i class="fa-solid fa-section fa-xl"></i>
+<nav class="navbar navbar-expand-md sticky-top app-navbar">
+  <div class="container-fluid app-navbar__inner">
+    <a class="navbar-brand app-brand" href="/listings" aria-label="StaySphere home">
+      <span class="app-brand__mark"><i class="fa-solid fa-house-chimney-window"></i></span>
+      <span>StaySphere</span>
     </a>
 
-    <!-- ✅ Toggler -->
     <button
       class="navbar-toggler"
       type="button"
@@ -21,63 +19,43 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- ✅ Collapsing content -->
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-
-      <ul class="navbar-nav w-100 align-items-md-center flex-nowrap nav-grid">
-
-        <!-- ✅ LEFT SIDE -->
-        <li class="nav-item">
-          <a class="nav-link" href="/listings">Explore</a>
+      <ul class="navbar-nav align-items-md-center nav-grid">
+        <li class="nav-item nav-explore">
+          <a class="nav-link" href="/listings">Explore stays</a>
         </li>
 
-        <!-- ✅ CENTER SEARCH -->
-        <!-- ✅ CHANGED: removed flex-grow-1 -->
-        <!-- ✅ ADDED: mx-auto to push this exactly center -->
-        <li class="nav-item nav-center my-2 my-md-0">  <!-- ✅ CHANGED -->
-          <form
-            class="d-flex"
-            role="search"
-            action="/listings/search"
-            method="get"
-            id="searchBox"
-          >
+        <li class="nav-item nav-center">
+          <form action="/listings/search" method="get" id="searchBox" role="search">
             <input
               class="form-control search-input"
               type="search"
               name="q"
-              placeholder="Search Destinations"
+              placeholder="Where would you like to go?"
+              aria-label="Search stays by destination"
             />
-
-            <button class="btn search-btn" type="submit">
+            <button class="btn search-btn" type="submit" aria-label="Search">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span class="search-text">Search</span>
             </button>
           </form>
         </li>
 
-        <!-- ✅ RIGHT SIDE -->
         <li class="nav-item nav-right">
-  <div class="nav-right-links">
-    <a class="nav-link" href="/profile">Profile</a>
-    <a class="nav-link" href="/listings/new">StaySphere Your Home</a>
-
-    <% if(!currentUser) { %>
-      <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-      <a class="nav-link" href="/login"><b>Log In</b></a>
-    <% } %>
-
-    <% if(currentUser) { %>
-      <a class="nav-link" href="/logout"><b>Log Out</b></a>
-    <% } %>
-  </div>
-</li>
-
-
-        
-
+          <div class="nav-right-links">
+            <a class="nav-link nav-host-link" href="/listings/new">Become a host</a>
+            <% if (currentUser) { %>
+              <a class="nav-link" href="/profile">Profile</a>
+              <a class="nav-link nav-auth-link" href="/logout">Log out</a>
+            <% } else { %>
+              <a class="nav-link" href="/login">Log in</a>
+              <a class="nav-link nav-signup-link" href="/signup">Sign up</a>
+            <% } %>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
+
 <script src="/js/navbar.js"></script>

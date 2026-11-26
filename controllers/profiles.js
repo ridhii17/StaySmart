@@ -12,14 +12,14 @@ module.exports.profile = async (req, res) => {
 module.exports.allListingDestroy = async (req, res, next) => {
   let { id } = req.params;
   let deleteListing = await Listing.deleteMany({ owner: id });
-  req.flash("success", `Listing ${deleteListing.deletedCount} Deleted!`);
+  req.flash("success", `${deleteListing.deletedCount} places removed.`);
   res.redirect("/profile");
 };
 module.exports.profileDestroyListing = async (req, res, next) => {
   let { id } = req.params;
   let deleteListing = await Listing.findByIdAndDelete(id);
   console.log(deleteListing);
-  req.flash("success", "Listing Deleted!");
+  req.flash("success", "Your place has been removed.");
   console.log("delete");
   res.redirect("/profile");
 };

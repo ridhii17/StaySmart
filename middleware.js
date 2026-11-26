@@ -7,7 +7,7 @@ const { listingSchema, reviewSchema , userSchema} = require("./schema");
 module.exports.isLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     req.session.redirectUrl = req.originalUrl;
-    req.flash("error", "You must be logged in to create a listing.");
+    req.flash("error", "Sign in to share a place with travelers.");
     return res.redirect("/login");
   }
   next();
@@ -39,16 +39,16 @@ module.exports.isOwnerAll = async (req, res, next) => {
     let listing = await Listing.findOne({ owner: id });
     console.log(listing);
     if (!listing) {
-      req.flash("error", "You don't have any listings...");
+      req.flash("error", "You don't have any places yet.");
       return res.redirect(`/profile`);
     }
     if (!listing.owner.equals(res.locals.currentUser._id)) {
-      req.flash("error", "You are not the owner of this listing...");
+      req.flash("error", "You don't manage this place.");
       return res.redirect(`/listings`);
     }
     next();
   } catch (err) {
-    next(new ExpressError(400, "This Listing Page is not valid..."));
+    next(new ExpressError(400, "This place page is not available."));
   }
 };
 

@@ -1,11 +1,6 @@
 <% layout('layouts/boilerplate') -%>
-
-<!-- <h3>All Listings</h3> -->
-<!-- <FORM action="/listings/new" method="GET">
-      <button>Create New Listing</button>
-    </FORM> -->
-
 <link rel="stylesheet" href="/css/filter.css" />
+<link rel="stylesheet" href="/css/listings-page.css" />
 <div class="filters-main">
   <div id="filters">
     <div class="left_img_button" id="slideButton" style="display: none">
@@ -312,28 +307,75 @@
     >
   </div>
 </div>
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-  <% for (let listing of listings) { %>
-  <a href="/listings/<%= listing._id %>" class="listing-link">
-    <div class="card col listing-card">
-      <img
-        src="<%= listing.image.url %>"
-        class="card-img-top"
-        alt="Listing-Images"
-        style="height: 20rem"
-      />
-      <div class="card-img-overlay"></div>
-      <div class="card-body">
-        <p class="card-text">
-          <b><%= listing.title %></b><br />
-          &#8377; <%= listing.price.toLocaleString("en-IN") %>
-          <br />
-          <%= listing.description %><br />
-        </p>
-      </div>
+<section class="stays-results" aria-labelledby="stays-heading">
+  <div class="stays-intro">
+    <div class="stays-intro__copy">
+      <p class="stays-eyebrow">STAYSPHERE · PLACES TO STAY</p>
+      <h1 id="stays-heading">Find a stay that feels like yours.</h1>
+      <p class="stays-intro__description">
+        Browse distinctive homes for a quick escape, a city break, or a longer stay.
+      </p>
     </div>
-  </a>
+    <div class="stays-count" aria-label="Number of stays">
+      <i class="fa-solid fa-house-chimney-window" aria-hidden="true"></i>
+      <span><strong><%= listings.length.toLocaleString("en-IN") %></strong> places to explore</span>
+    </div>
+  </div>
+
+  <% if (listings.length > 0) { %>
+    <div class="stay-grid">
+      <% for (const listing of listings) {
+        const locationParts = [listing.location, listing.country].filter(Boolean);
+        const locationLabel = [...new Set(locationParts)].join(", ");
+        const categoryLabel = Array.isArray(listing.category) ? listing.category[0] : listing.category;
+      %>
+        <article class="stay-card">
+          <a
+            href="/listings/<%= listing._id %>"
+            class="stay-card__link"
+            aria-label="View <%= listing.title %>"
+          >
+            <div class="stay-card__media">
+              <img
+                src="<%= listing.image && listing.image.url ? listing.image.url : '/Icon/listing-img-pre.png' %>"
+                alt="<%= listing.title %>"
+                loading="lazy"
+                decoding="async"
+                onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"
+              />
+              <% if (categoryLabel) { %>
+                <span class="stay-card__category"><%= categoryLabel %></span>
+              <% } %>
+            </div>
+
+            <div class="stay-card__content">
+              <div class="stay-card__location">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span><%= locationLabel || "Location available on request" %></span>
+              </div>
+              <h2 class="stay-card__title"><%= listing.title %></h2>
+              <p class="stay-card__description"><%= listing.description %></p>
+              <div class="stay-card__footer">
+                <p class="stay-card__price">
+                  <strong>₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "—" %></strong>
+                  <span>/ night</span>
+                </p>
+                <span class="stay-card__view">View stay <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+              </div>
+            </div>
+          </a>
+        </article>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="stays-empty">
+      <span class="stays-empty__icon"><i class="fa-regular fa-compass" aria-hidden="true"></i></span>
+      <h2>No stays found here yet</h2>
+      <p>Try another destination or browse all available stays.</p>
+      <a href="/listings" class="stays-empty__button">Explore all stays</a>
+    </div>
   <% } %>
-</div>
+</section>
+
  <script defer src="/js/filter.js"></script>
         

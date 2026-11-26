@@ -1,201 +1,238 @@
-/* -------------------------
-   NAVBAR SEARCH DESIGN
--------------------------- */
-
-.search-btn {
-  background-color: #fe424d;
-  color: #fff;
-  border-radius: 25px;
-  padding: 0.45rem 0.9rem;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+.app-navbar {
+  min-height: 76px;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: #ece9e5 !important;
+  box-shadow: 0 5px 22px rgba(31, 41, 55, 0.045);
+  backdrop-filter: blur(14px);
 }
 
-.search-btn:hover {
-  background-color: #fe424d;
-  color: #fff;
-}
-
-.search-input {
-  border-radius: 25px;
-  border: 0.5px solid rgba(128, 128, 128, 0.503);
-  padding: 0.4rem 1rem;
-  font-size: 0.95rem;
-  height: 2.6rem;
-  width: 100%; /* ✅ important */
-  min-width: 0; /* ✅ important (fix overflow) */
-  background-color: #fff;
-}
-
-/* Logo */
-.navbar-brand i {
-  color: #fe424d;
-  margin-left: 1rem;
-}
-
-/* ✅ IMPORTANT: stop horizontal scrolling */
-html,
-body {
-  overflow-x: hidden;
-}
-
-/* ✅ Search form always full width */
-#searchBox {
+.app-navbar__inner {
   width: 100%;
-  max-width: 300px; /* ✅ keeps nice size in desktop */
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0;
 }
 
-/* -------------------------
-   RESPONSIVE FIXES
--------------------------- */
-
-/* ✅ Tablet & below */
-@media (max-width: 991px) {
-  #searchBox {
-    max-width: 100%; /* ✅ full width in smaller screens */
-  }
-}
-
-/* ✅ Mobile */
-@media (max-width: 767px) {
-  /* collapse menu box */
-  .navbar-collapse {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    margin-top: 10px;
-  }
-
-  /* center links in mobile */
-  .navbar-nav {
-    width: 100%;
-    text-align: center;
-  }
-
-  .navbar-nav .nav-link {
-    padding: 0.6rem 0;
-    font-size: 1rem;
-  }
-
-  /* ✅ SEARCH FIX (MOST IMPORTANT PART) */
-  #searchBox {
-    max-width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 4px !important;
-  }
-
-  #searchBox .search-input {
-    height: 2.6rem;
-    padding: 0.4rem 1rem;
-    font-size: 0.95rem;
-  }
-
-  /* ✅ keep button small (NOT full width) */
-  #searchBox .search-btn {
-    height: 2.6rem;
-    padding: 0 14px;
-    border-radius: 50px;
-  }
-
-  /* ✅ hide Search text only in mobile */
-  .search-text {
-    display: none;
-  }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-  .navbar-brand i {
-    font-size: 1.4rem;
-  }
-
-  #searchBox .search-input {
-    height: 2.4rem;
-    font-size: 0.9rem;
-  }
-
-  #searchBox .search-btn {
-    height: 2.4rem;
-    padding: 0 12px;
-  }
-}
-
-/* ✅ Prevent navbar items from breaking into new line */
-@media (min-width: 768px) {
-  .navbar-nav {
-    flex-wrap: nowrap !important;
-  }
-
-  /* ✅ Search should not take full space */
-  #searchBox {
-    max-width: 320px; /* ✅ adjust size you like */
-  }
-}
-#searchBox {
-  gap: 4px !important;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.app-brand {
+  display: inline-flex;
   align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  color: #1f2937 !important;
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: -0.055em;
 }
 
-/* ==========================
-   PERFECT CENTER SEARCH FIX
-========================== */
+.app-brand:hover {
+  color: #1f2937 !important;
+}
 
-/* 3-column layout: left / center / right */
+.app-brand__mark {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 12px;
+  background: #fff0ed;
+  color: #d84d43;
+  font-size: 1rem;
+}
+
 .nav-grid {
   display: grid !important;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(150px, 1fr) minmax(260px, 410px) minmax(245px, 1fr);
   align-items: center;
+  width: 100%;
+  margin: 0;
+}
+
+.nav-explore {
+  justify-self: start;
+}
+
+.nav-center {
+  justify-self: center;
   width: 100%;
 }
 
-/* center item always centered */
-.nav-center {
-  justify-self: center;
-}
-
-/* right links pushed to right */
 .nav-right {
   justify-self: end;
 }
 
-/* right side links inside one flex row */
+.nav-grid .nav-link {
+  color: #4b5563 !important;
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: color 160ms ease;
+}
+
+.nav-grid .nav-link:hover {
+  color: #c24138 !important;
+}
+
+#searchBox {
+  display: flex;
+  width: 100%;
+  max-width: 410px;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.35rem 0.28rem 0.95rem;
+  border: 1px solid #e7e5e4;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(31, 41, 55, 0.045);
+}
+
+.search-input {
+  width: 100%;
+  min-width: 0;
+  height: 2.45rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1f2937;
+  font-size: 0.86rem;
+  box-shadow: none !important;
+}
+
+.search-input:focus {
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #8b929b;
+}
+
+.search-btn {
+  display: inline-flex;
+  min-width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0 0.95rem;
+  border: 0;
+  border-radius: 999px;
+  background: #d84d43;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.search-btn:hover,
+.search-btn:focus-visible {
+  background: #bd3f36;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 .nav-right-links {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 0.35rem;
 }
 
-/* make search not stretch huge */
-#searchBox {
-  max-width: 380px;
+.nav-grid .nav-host-link {
+  margin-right: 0.35rem;
+  color: #374151 !important;
 }
 
-/* mobile: remove grid, stack normally */
-@media (max-width: 767px) {
+.nav-grid .nav-signup-link {
+  padding: 0.58rem 1rem;
+  border-radius: 999px;
+  background: #1f2937;
+  color: #fff !important;
+}
+
+.nav-grid .nav-signup-link:hover {
+  background: #111827;
+  color: #fff !important;
+}
+
+.navbar-toggler {
+  border-color: #e7e5e4;
+  border-radius: 12px;
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+  .app-navbar {
+    padding-right: 0.85rem;
+    padding-left: 0.85rem;
+  }
+
   .nav-grid {
-    display: flex !important;
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: minmax(110px, 1fr) minmax(220px, 340px) minmax(210px, 1fr);
+  }
+
+  .nav-grid .nav-link {
+    font-size: 0.83rem;
   }
 
   .nav-right-links {
-    flex-direction: column;
-    gap: 10px;
+    gap: 0.1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-navbar {
+    min-height: 68px;
+    padding: 0.65rem 1rem;
   }
 
-  .nav-center {
+  .app-navbar .navbar-collapse {
+    margin-top: 0.8rem;
+    padding: 0.75rem 0.9rem 1rem;
+    border: 1px solid #eee9e4;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(31, 41, 55, 0.1);
+  }
+
+  .nav-grid {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.65rem;
+  }
+
+  .nav-explore,
+  .nav-center,
+  .nav-right {
     width: 100%;
+    justify-self: stretch;
+  }
+
+  .nav-grid .nav-link {
+    padding: 0.55rem 0.35rem;
   }
 
   #searchBox {
-    max-width: 100%;
+    max-width: none;
+  }
+
+  .nav-right-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.35rem 1rem;
+  }
+
+  .nav-grid .nav-signup-link {
+    padding: 0.58rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-text {
+    display: none;
+  }
+
+  .search-btn {
+    width: 42px;
+    padding: 0;
   }
 }
