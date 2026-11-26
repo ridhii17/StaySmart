@@ -9,7 +9,7 @@ fileInput.addEventListener("click", function () {
   }
 });
 varify.addEventListener("click", function () {
-  const maxSize = 100 * 1024; // 100KB in bytes
+  const maxSize = 200 * 1024; // 100KB in bytes
   console.log("click button");
 
   if (fileInput.files.length === 0) {
