@@ -1,4 +1,8 @@
 const User = require("../models/user");
+const Listing = require("../models/listing");
+const Review = require("../models/review");
+const Booking = require("../models/booking");
+const Trip = require("../models/trip");
 
 module.exports.renderSignupForm = (req, res) => {
   res.render("users/signup.ejs");
@@ -7,14 +11,15 @@ module.exports.renderSignupForm = (req, res) => {
 module.exports.signup = async (req, res, next) => {
   try {
     let { username, email, password, fName, lName } = req.body;
-    const newUser = new User({ username, email, fName, lName });
+    const role = req.body.role === "host" ? "host" : "guest";
+    const newUser = new User({ username, email, fName, lName, role });
     const registeredUser = await User.register(newUser, password);
     //Auto login
     req.login(registeredUser, (err) => {
       if (err) {
         return next(err);
       }
-      req.flash("success", "Welcome to StaySphere!");
+      req.flash("success", "Welcome to StaySmart!");
       res.redirect("/listings");
     });
   } catch (err) {
@@ -28,8 +33,17 @@ module.exports.renderLoginForm = (req, res) => {
   res.render("users/login");
 };
 
+module.exports.updateFormRender = async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    req.flash("error", "That account could not be found.");
+    return res.redirect("/profile");
+  }
+  res.render("users/update.ejs", { user });
+};
+
 module.exports.login = async (req, res) => {
-  req.flash("success", "Welcome back to StaySphere!");
+  req.flash("success", "Welcome back to StaySmart!");
   let redirectUrl = res.locals.redirectUrl || "/listings";
   // res.redirect(res.locals.redirectUrl);
   res.redirect(redirectUrl);
@@ -107,7 +121,11 @@ module.exports.deleteAccount = async (req, res, next) => {
   try {
     let { id } = req.params;
     await Listing.deleteMany({ owner: id });
+    const ownReviews = await Review.find({ author: id }).select("_id listing");
+    for (const review of ownReviews) await Listing.updateOne({ _id: review.listing }, { $pull: { reviews: review._id } });
     await Review.deleteMany({ author: id });
+    await Booking.deleteMany({ guest: id });
+    await Trip.deleteMany({ owner: id });
     await User.findByIdAndDelete(id);
     // req.logout();
     req.flash("success", "Your account has been successfully deleted.");

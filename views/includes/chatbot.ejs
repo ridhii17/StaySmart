@@ -1,0 +1,59 @@
+<link rel="stylesheet" href="/css/chatbot.css" />
+
+<div class="chat-assistant">
+  <section class="chat-panel" id="chatPanel" aria-label="StaySmart assistant" hidden>
+    <header class="chat-panel__header">
+      <span class="chat-panel__avatar"><i class="fa-solid fa-house-chimney-window" aria-hidden="true"></i></span>
+      <div class="chat-panel__identity">
+        <strong>StaySmart trip assistant</strong>
+        <span><i aria-hidden="true"></i> Here to help</span>
+      </div>
+      <button class="chat-panel__close" id="chatClose" type="button" aria-label="Close chat">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div class="chat-panel__messages" id="chatMessages" aria-live="polite" aria-relevant="additions">
+      <div class="chat-message chat-message--assistant">
+        <p>Hi! I can find current places by destination and budget, help plan a group trip, or explain a reservation cost.</p>
+        <time>StaySmart assistant</time>
+      </div>
+      <div class="chat-quick-prompts" id="chatQuickPrompts">
+        <button type="button" data-prompt="Find a stay in Jaipur under ₹3000 for 2 guests">Find a stay</button>
+        <button type="button" data-prompt="How do I add my place?">Add my place</button>
+        <button type="button" data-prompt="How do reviews work?">Reviews</button>
+      </div>
+    </div>
+
+    <form class="chat-panel__form" id="chatForm">
+      <label class="visually-hidden" for="chatInput">Message the StaySmart assistant</label>
+      <input
+        id="chatInput"
+        name="message"
+        type="text"
+        maxlength="500"
+        placeholder="Ask us anything..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit" aria-label="Send message">
+        <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+      </button>
+    </form>
+  </section>
+
+  <button
+    class="chat-toggle"
+    id="chatToggle"
+    type="button"
+    aria-label="Open StaySmart assistant"
+    aria-expanded="false"
+    aria-controls="chatPanel"
+  >
+    <i class="fa-regular fa-message chat-toggle__message" aria-hidden="true"></i>
+    <i class="fa-solid fa-xmark chat-toggle__close" aria-hidden="true"></i>
+    <span>Need help?</span>
+  </button>
+</div>
+
+<script src="/js/chatbot.js" defer></script>

@@ -1,6 +1,9 @@
 <!-- <link rel="stylesheet" href="/css/show.css"> -->
 <link rel="stylesheet" href="/css/delete-confirm.css">
 <link rel="stylesheet" href="/css/button-style.css">
+<link rel="stylesheet" href="/css/reviews.css">
+<link rel="stylesheet" href="/css/features.css">
+<link rel="stylesheet" href="/css/stay-detail.css">
 
 <% layout("/layouts/boilerplate") %>
 
@@ -12,173 +15,118 @@
         }
     </style>
 
-<div class="row mt-3">
-  <!-- Listing -->
-  <!-- Title -->
-  <div class="col-8 offset-3">
-    <h3><%= listing.title %></h3>
-  </div>
+<main class="stay-detail-page">
+  <header class="stay-detail-heading"><div><p class="smart-eyebrow"><%= listing.propertyType || "HOME" %> · <%= [listing.location,listing.country].filter(Boolean).join(", ") %></p><h1><%= listing.title %></h1><p class="stay-detail-subtitle"><% if (reviewCount > 0) { %><i class="fa-solid fa-star"></i> <strong><%= averageRating %></strong> · <%= reviewCount %> guest reviews <% } else { %>New stay · Be the first to share feedback<% } %> · Up to <%= listing.capacity || 2 %> guests</p></div><div class="stay-detail-heading__actions"><% if (currentUser) { %><form action="/wishlist/<%= listing._id %>/toggle" method="POST"><button class="smart-button smart-button--outline"><i class="fa-<%= listingSaved ? 'solid' : 'regular' %> fa-heart"></i> <%= listingSaved ? 'Saved' : 'Save' %></button></form><% } %><% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %><a class="smart-button smart-button--outline" href="/listings/<%= listing._id %>/edit">Edit place</a><% } else { %><a class="smart-button" href="/bookings/new/<%= listing._id %>">Check availability</a><% } %></div></header>
 
-  <div class="card col-6 offset-3 show-card listing-card">
-    <img
-      src="<%= listing.image && listing.image.url ? listing.image.url : '/Icon/listing-img-pre.png' %>"
-      class="card-img-top show-img"
-      alt="<%= listing.title %>"
-      onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"
-    />
-    <div class="card-body">
-      <% if (listing.owner && listing.owner.username) { %>
-        <p class="card-text">Hosted by <strong><%= listing.owner.username %></strong></p>
-      <% } %>
+  <section class="stay-gallery" aria-label="Photos of <%= listing.title %>"><% const galleryImages = [listing.image, ...(listing.images || [])].filter(photo => photo && photo.url); %><% if (galleryImages.length) { %><img class="stay-gallery__hero" src="<%= galleryImages[0].url %>" alt="<%= listing.title %>" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"/><div class="stay-gallery__more"><% for (const photo of galleryImages.slice(1,5)) { %><img src="<%= photo.url %>" alt="Additional view of <%= listing.title %>" loading="lazy"/><% } %><% if (galleryImages.length === 1) { %><div class="stay-gallery__placeholder"><i class="fa-solid fa-image"></i><span>More photos from the host will appear here</span></div><% } %></div><% } else { %><img class="stay-gallery__hero" src="/Icon/listing-img-pre.png" alt="Photo coming soon"/><div class="stay-gallery__placeholder">A photo is coming soon.</div><% } %></section>
 
-      <p class="card-text"><%= listing.description %> <br /></p>
-      <p class="card-text">
-        &#8377; <%= listing.price.toLocaleString("en-IN") %> / night <br />
-      </p>
-      <p class="card-text"><%= listing.location %> <br /></p>
-      <p class="card-text"><%= listing.country %></p>
-    </div>
-  </div>
-
-  <br />
-
-  <!-- Buttons  -->
-  <% if (currentUser && listing.owner &&
-  currentUser._id.equals(listing.owner._id)) { %>
-  <div class="btns">
-    <a
-      href="/listings/<%= listing._id %>/edit"
-      class="btn btn-dark col-1 offset-3 edit-btn"
-    >
-      Edit
-    </a>
-    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="needs-validation">
-      <button class="btn btn-dark offset-5">Delete</button>
-    </form>
-  </div>
-  <% } %>
+  <div class="stay-detail-columns"><div class="stay-detail-main">
+    <section class="stay-overview"><div><p class="smart-eyebrow">YOUR STAY</p><h2>Hosted by <%= listing.owner?.fName || listing.owner?.username || "Local host" %></h2><p><%= listing.propertyType || "Home" %> · <%= listing.capacity || 2 %> guests · <%= listing.amenities?.length || 0 %> listed amenities</p></div><div class="trust-score"><span><i class="fa-solid fa-shield-heart"></i> Trust score</span><strong><%= trustScore %><small>/100</small></strong><details><summary>How is this calculated?</summary><p>StaySmart combines guest ratings and review history with host profile completeness and listing detail quality. New places can earn points for complete information while reviews build.</p></details></div></section>
+    <p class="stay-detail-description"><%= listing.description %></p>
+    <section class="stay-amenities"><h2>What this place offers</h2><% if (listing.amenities?.length) { %><div><% for (const amenity of listing.amenities) { %><span><i class="fa-solid fa-check"></i> <%= amenity %></span><% } %></div><% } else { %><p class="smart-muted">The host hasn’t added amenity details yet.</p><% } %></section>
+    <% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %><div class="stay-owner-actions"><a href="/listings/<%= listing._id %>/edit" class="smart-button smart-button--outline">Manage place details</a><form method="POST" action="/listings/<%= listing._id %>?_method=DELETE"><button class="smart-button smart-button--outline">Remove place</button></form><a href="/host/bookings" class="smart-button smart-button--outline">Host reservations</a></div><% } %>
+  </div><aside class="stay-reservation-card"><p class="smart-price"><strong>₹<%= Number(listing.price || 0).toLocaleString("en-IN") %></strong> <small>/ night</small></p><p><i class="fa-solid fa-shield-heart"></i> Trust score <strong><%= trustScore %>/100</strong></p><p><i class="fa-solid fa-user-group"></i> Up to <%= listing.capacity || 2 %> guests</p><% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %><p class="smart-muted">This is your place.</p><% } else { %><a class="smart-button smart-button--wide" href="/bookings/new/<%= listing._id %>">Check dates and price</a><p class="smart-muted">No charge until you confirm. Checkout fees are shown before confirmation.</p><% } %></aside></div>
   
-  <div class="col-8 offset-3" mb-3>
-    <% if(currentUser) { %>
-    <hr />
-    <h4>Leave a Review</h4>
-    <form
-      action="/listings/<%= listing._id %>/reviews"
-      method="POST"
-      novalidate
-      class="needs-validation"
-    >
-      <div class="mb-3" mt-3>
-        <label for="rating" class="form-label">Rating</label>
-        <fieldset class="starability-slot">
-          <input
-            type="radio"
-            id="no-rate"
-            class="input-no-rate"
-            name="review[rating]"
-            value="1"
-            checked
-            aria-label="No rating."
-          />
-          <input
-            type="radio"
-            id="first-rate1"
-            name="review[rating]"
-            value="1"
-          />
-          <label for="first-rate1" title="Terrible">1 star</label>
-          <input
-            type="radio"
-            id="first-rate2"
-            name="review[rating]"
-            value="2"
-          />
-          <label for="first-rate2" title="Not good">2 stars</label>
-          <input
-            type="radio"
-            id="first-rate3"
-            name="review[rating]"
-            value="3"
-          />
-          <label for="first-rate3" title="Average">3 stars</label>
-          <input
-            type="radio"
-            id="first-rate4"
-            name="review[rating]"
-            value="4"
-          />
-          <label for="first-rate4" title="Very good">4 stars</label>
-          <input
-            type="radio"
-            id="first-rate5"
-            name="review[rating]"
-            value="5"
-          />
-          <label for="first-rate5" title="Amazing">5 stars</label>
-        </fieldset>
+  <section class="stay-reviews" aria-labelledby="reviews-heading">
+    <div class="stay-reviews__header">
+      <div>
+        <p class="reviews-eyebrow">GUEST FEEDBACK</p>
+        <h2 id="reviews-heading">Reviews</h2>
       </div>
+      <% if (reviewCount > 0) { %>
+        <div class="reviews-summary">
+          <i class="fa-solid fa-star" aria-hidden="true"></i>
+          <strong><%= averageRating %></strong>
+          <span><%= reviewCount %> <%= reviewCount === 1 ? "review" : "reviews" %></span>
+        </div>
+      <% } %>
+    </div>
 
-      <div class="mb-3" mt-3>
-        <label for="comment" class="form-label">Comment</label>
-        <textarea
-          id="comment"
-          cols="30"
-          rows="5"
-          name="review[comment]"
-          class="form-control"
-          required
-        ></textarea>
-        <div class="invalid-feedback">Please provide a comment!</div>
+    <% if (reviewCount > 0) { %>
+      <div class="guest-review-grid">
+        <% for (const review of listing.reviews) { %>
+          <article class="guest-review">
+            <div class="guest-review__author">
+              <span class="guest-review__avatar"><%= review.author && review.author.username ? review.author.username.charAt(0).toUpperCase() : "G" %></span>
+              <div>
+                <strong><%= review.author && review.author.username ? review.author.username : "Guest" %></strong>
+                <time datetime="<%= new Date(review.createAt).toISOString() %>"><%= new Date(review.createAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) %></time>
+              </div>
+            </div>
+            <p class="starability-result guest-review__rating" data-rating="<%= review.rating %>"></p>
+            <p class="guest-review__comment"><%= review.comment %></p>
+            <% if (currentUser && review.author && currentUser._id.equals(review.author._id)) { %>
+              <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                <button class="guest-review__delete" type="submit">Remove your review</button>
+              </form>
+            <% } %>
+          </article>
+        <% } %>
       </div>
-      <button type="submit" class="btn btn-outline-dark">Submit</button>
-    </form>
-    <hr />
-    <% } %> <% if (listing.reviews.length > 0) { %>
-    <div class="row">
-      <p><b>All Reviews</b></p>
-      <% if (listing.reviews.length === 0) { %>
-      <p>No reviews yet.</p>
-      <% } %> <% for (let review of listing.reviews) { %>
-      <div class="card col-5 ms-3 mb-3">
-        <div class="card-body">
-          <h5 class="card-title">@<%= review.author.username %></h5>
-          <p
-            class="starability-result card-text"
-            data-rating="<%= review.rating %>"
-          ></p>
-          <p class="card-text"><%= review.comment %></p>
-          <form
-            class="mb-3"
-            method="POST"
-            action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
-          >
-            <button class="btn btn-sm btn-dark">Delete</button>
-          </form>
+    <% } else { %>
+      <div class="reviews-empty">
+        <span><i class="fa-regular fa-comment-dots" aria-hidden="true"></i></span>
+        <div>
+          <strong>Be the first to review this place</strong>
+          <p>Share helpful details for the next traveler.</p>
         </div>
       </div>
+    <% } %>
+
+    <div class="review-composer">
+      <% if (currentUser) { %>
+        <h3>Share your experience</h3>
+        <p>Your honest feedback helps other travelers choose with confidence.</p>
+        <form
+          action="/listings/<%= listing._id %>/reviews"
+          method="POST"
+          novalidate
+          class="needs-validation"
+        >
+          <div class="mb-3">
+            <label for="rating" class="form-label">Your rating</label>
+            <fieldset class="starability-slot">
+              <input type="radio" id="first-rate1" name="review[rating]" value="1" required />
+              <label for="first-rate1" title="Terrible">1 star</label>
+              <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+              <label for="first-rate2" title="Not good">2 stars</label>
+              <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+              <label for="first-rate3" title="Average">3 stars</label>
+              <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+              <label for="first-rate4" title="Very good">4 stars</label>
+              <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+              <label for="first-rate5" title="Amazing">5 stars</label>
+            </fieldset>
+          </div>
+
+          <div class="mb-3">
+            <label for="comment" class="form-label">Your review</label>
+            <textarea id="comment" rows="4" name="review[comment]" class="form-control" placeholder="What should other travelers know?" required></textarea>
+            <div class="invalid-feedback">Add a short note about your experience.</div>
+          </div>
+          <button type="submit" class="review-submit">Post review</button>
+        </form>
+      <% } else { %>
+        <div class="review-signin">
+          <div>
+            <h3>Stayed here before?</h3>
+            <p>Sign in to share your experience with other travelers.</p>
+          </div>
+          <a href="/login">Sign in to review</a>
+        </div>
       <% } %>
     </div>
-    <% } %>
-  </div>
+  </section>
 
-  <div class="col-6 offset-3 mb-3">
-    <h3>Where you'll be</h3>
-    <div id="map"></div>
+  <section class="stay-nearby smart-section"><div class="smart-section-heading"><div><p class="smart-eyebrow">NEARBY PLACES</p><h2>Explore around this stay</h2><p>Restaurants, hospitals, transit and attractions within about 5 km.</p></div></div><div class="stay-map-layout"><div id="map" aria-label="Map showing the place and nearby points"></div><div class="nearby-panel"><h3>Places nearby</h3><div id="nearbyPlaces" data-listing-id="<%= listing._id %>"><p class="smart-muted">Loading nearby places…</p></div></div></div><p class="smart-muted">Map data © OpenStreetMap contributors. Nearby place data is provided by Geoapify.</p></section>
+
+  <% if (alternatives.length) { %><section class="smart-section"><div class="smart-section-heading"><div><p class="smart-eyebrow">SMART ALTERNATIVES</p><h2>Similar places to consider</h2><p>More options nearby with nightly rates at or below a similar range.</p></div></div><div class="smart-grid"><% for (const alternative of alternatives) { const ratingList = (alternative.reviews || []).map(review => Number(review.rating)).filter(Number.isFinite); const avg = ratingList.length ? (ratingList.reduce((a,b)=>a+b,0)/ratingList.length).toFixed(1) : null; %><article class="smart-card"><a class="smart-card__photo" href="/listings/<%= alternative._id %>"><img src="<%= alternative.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= alternative.title %>" loading="lazy"/><span class="smart-card__score"><%= alternative.capacity || 2 %> guests</span></a><div class="smart-card__body"><p class="smart-muted"><%= [alternative.location,alternative.country].filter(Boolean).join(", ") %></p><h3><a href="/listings/<%= alternative._id %>"><%= alternative.title %></a></h3><p class="smart-muted"><%= avg ? `${avg} ★ · ${ratingList.length} reviews` : "New place" %></p><p class="smart-price">₹<%= Number(alternative.price || 0).toLocaleString("en-IN") %> <small>/ night</small></p><a class="smart-button smart-button--outline" href="/bookings/new/<%= alternative._id %>">Check dates</a></div></article><% } %></div></section><% } %>
+</main>
+
     <script>
-      const geoapifyKey = "<%= process.env.GEOAPIFY_KEY %>";
-
-      const listingData = {
-        title: "<%- listing.title %>",
-        coordinates: JSON.parse(
-          "<%- JSON.stringify(listing.geometry?.coordinates || []) %>"
-        ),
-      };
+      const geoapifyKey = <%- JSON.stringify(process.env.GEOAPIFY_KEY || "") %>;
+      const listingData = <%- JSON.stringify({ title: listing.title, coordinates: listing.geometry?.coordinates || [] }).replace(/</g, "\\u003c") %>;
     </script>
-
     <script src="/js/map.js"></script>
-  </div>
-</div>
-
-
-    <script src="/js/map.js"></script>
+    <script src="/js/nearby.js"></script>
     <script src="/js/delete-confirm.js"></script>

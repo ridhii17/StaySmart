@@ -1,23 +1,21 @@
-let passwordBox = document.getElementById("password-box");
-let detailBox = document.getElementById("detail-box");
-let imageBox = document.getElementById("image-box");
+(() => {
+  const tabs = Array.from(document.querySelectorAll("[data-settings-tab]"));
+  if (!tabs.length) return;
 
-let passwordFind = document.querySelector("#password-find");
-let detailFind = document.querySelector("#detail-find");
-let imageFind = document.querySelector("#image-find");
+  const panels = tabs
+    .map((tab) => document.getElementById(tab.dataset.settingsTab))
+    .filter(Boolean);
 
-detailFind.addEventListener("click", () => {
-  passwordBox.style.display = "none";
-  detailBox.style.display = "inline";
-  imageBox.style.display = "none";
-});
-imageFind.addEventListener("click", () => {
-  imageBox.style.display = "inline";
-  passwordBox.style.display = "none";
-  detailBox.style.display = "none";
-});
-passwordFind.addEventListener("click", () => {
-  passwordBox.style.display = "inline";
-  detailBox.style.display = "none";
-  imageBox.style.display = "none";
-});
+  function activate(tab) {
+    tabs.forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-selected", String(active));
+    });
+    panels.forEach((panel) => {
+      panel.hidden = panel.id !== tab.dataset.settingsTab;
+    });
+  }
+
+  tabs.forEach((tab) => tab.addEventListener("click", () => activate(tab)));
+})();

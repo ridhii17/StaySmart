@@ -1,9 +1,72 @@
 const axios = require("axios");
 const Listing = require("../models/listing");
+const Booking = require("../models/booking");
+const { getTrustScore, scoreListing } = require("../utils/stay-smart");
+const textQuery = (value) => typeof value === "string" ? value.trim().slice(0, 80) : "";
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function decorateListings(listings, user) {
+  for (const listing of listings) {
+    listing.trustScore = getTrustScore(listing, listing.owner);
+    listing.isSaved = Boolean(user?.savedListings?.some((id) => id.equals(listing._id)));
+  }
+}
 
 module.exports.index = async (req, res) => {
-  const listings = await Listing.find({});
-  res.render("listings/index", { listings });
+  const { destination: rawDestination = "", checkIn: rawCheckIn = "", checkOut: rawCheckOut = "", guests = "", minPrice: rawMinPrice = "", maxPrice: rawMaxPrice = "", propertyType: rawPropertyType = "", amenities = "", page = "1" } = req.query;
+  const destination = textQuery(rawDestination);
+  const checkIn = textQuery(rawCheckIn);
+  const checkOut = textQuery(rawCheckOut);
+  const minPrice = textQuery(rawMinPrice);
+  const maxPrice = textQuery(rawMaxPrice);
+  const propertyType = textQuery(rawPropertyType);
+  const escapedDestination = escapeRegex(destination);
+  const query = {};
+  const andClauses = [];
+  if (destination) andClauses.push({ $or: [
+    { title: { $regex: escapedDestination, $options: "i" } },
+    { location: { $regex: escapedDestination, $options: "i" } },
+    { country: { $regex: escapedDestination, $options: "i" } },
+  ] });
+  if (propertyType === "Home") andClauses.push({ $or: [{ propertyType: "Home" }, { propertyType: { $exists: false } }] });
+  else if (propertyType) query.propertyType = propertyType;
+  const guestCount = typeof guests === "string" ? Number(guests) : 0;
+  if (Number.isInteger(guestCount) && guestCount > 0) {
+    if (guestCount <= 2) andClauses.push({ $or: [{ capacity: { $gte: guestCount } }, { capacity: { $exists: false } }] });
+    else query.capacity = { $gte: Math.min(30, guestCount) };
+  }
+  if (andClauses.length) query.$and = andClauses;
+  const price = {};
+  if (Number.isFinite(Number(minPrice)) && Number(minPrice) >= 0 && minPrice !== "") price.$gte = Math.min(100000000, Number(minPrice));
+  if (Number.isFinite(Number(maxPrice)) && Number(maxPrice) > 0) price.$lte = Math.min(100000000, Number(maxPrice));
+  if (Object.keys(price).length) query.price = price;
+  const selectedAmenities = (Array.isArray(amenities) ? amenities : typeof amenities === "string" && amenities ? [amenities] : []).filter((item) => typeof item === "string").slice(0, 20);
+  if (selectedAmenities.length) query.amenities = { $all: selectedAmenities };
+  const parsedPage = Math.max(1, Math.min(1000, parseInt(page, 10) || 1));
+  const pageSize = 9;
+  const isDateOnly = (value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  };
+  const validDates = checkIn && checkOut && isDateOnly(checkIn) && isDateOnly(checkOut);
+  const checkInDate = validDates ? new Date(`${checkIn}T00:00:00`) : null;
+  const checkOutDate = validDates ? new Date(`${checkOut}T00:00:00`) : null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if ((checkIn || checkOut) && (!validDates || checkInDate < today || checkOutDate <= checkInDate)) {
+    req.flash("error", "Choose a future check-in date and a later check-out date.");
+  } else if (validDates) {
+    const conflicts = await Booking.find({ status: "confirmed", checkIn: { $lt: checkOutDate }, checkOut: { $gt: checkInDate } }).distinct("listing");
+    query._id = { $nin: conflicts };
+  }
+  const count = await Listing.countDocuments(query);
+  const listings = await Listing.find(query).populate("owner", "username email fName image").populate("reviews", "rating")
+    .sort({ _id: -1 }).skip((parsedPage - 1) * pageSize).limit(pageSize);
+  for (const listing of listings) {
+    listing.trustScore = getTrustScore(listing);
+    listing.matchScore = scoreListing(listing, { destination, budget: maxPrice, guests: guests || 1, amenities: selectedAmenities }).score;
+    listing.isSaved = Boolean(req.user?.savedListings?.some((id) => id.equals(listing._id)));
+  }
+  res.render("listings/index", { listings, search: { destination, checkIn, checkOut, guests, minPrice, maxPrice, propertyType, amenities: selectedAmenities }, page: parsedPage, pageCount: Math.ceil(count / pageSize), totalCount: count });
 };
 
 module.exports.renderNewForm = (req, res) => {
@@ -12,6 +75,10 @@ module.exports.renderNewForm = (req, res) => {
 
 module.exports.showListing = async (req, res) => {
   let { id } = req.params;
+  if (!require("mongoose").Types.ObjectId.isValid(id)) {
+    req.flash("error", "This place could not be found.");
+    return res.redirect("/listings");
+  }
   const listing = await Listing.findById(id)
     .populate({
       path: "reviews",
@@ -22,25 +89,42 @@ module.exports.showListing = async (req, res) => {
     .populate("owner");
   if (!listing) {
     req.flash("error", "This place could not be found.");
-    res.redirect("/listings");
+    return res.redirect("/listings");
   }
-  res.render("listings/show", { listing });
+  const reviewCount = listing.reviews.length;
+  const averageRating = reviewCount
+    ? (
+        listing.reviews.reduce((total, review) => total + review.rating, 0) /
+        reviewCount
+      ).toFixed(1)
+    : null;
+  const trustScore = getTrustScore(listing, listing.owner);
+  const escapedLocation = escapeRegex(String(listing.location || "").slice(0, 80));
+  const alternatives = await Listing.find({ _id: { $ne: listing._id }, location: { $regex: escapedLocation, $options: "i" }, price: { $lte: Math.ceil((listing.price || 0) * 1.35) }, $or: [{ capacity: { $gte: listing.capacity || 2 } }, { capacity: { $exists: false } }] })
+    .populate("reviews", "rating").sort({ price: 1 }).limit(4);
+  const listingSaved = Boolean(req.user?.savedListings?.some((savedId) => savedId.equals(listing._id)));
+  res.render("listings/show", { listing, reviewCount, averageRating, trustScore, alternatives, listingSaved });
 };
 
 module.exports.createListing = async (req, res, next) => {
   try {
     const geoKey = process.env.GEOAPIFY_KEY;
     //Create listing first
-    const newListing = new Listing(req.body.listing);
+    const listingDetails = { ...req.body.listing };
+    listingDetails.amenities = Array.isArray(listingDetails.amenities) ? listingDetails.amenities : listingDetails.amenities ? [listingDetails.amenities] : [];
+    const newListing = new Listing(listingDetails);
     //Get uploaded image
-    if (req.file) {
+    const coverPhoto = req.files?.["listing[image]"]?.[0];
+    if (coverPhoto) {
       newListing.image = {
-        url: req.file.path,
-        filename: req.file.filename,
+        url: coverPhoto.path,
+        filename: coverPhoto.filename,
       };
     }
+    newListing.images = (req.files?.["listing[gallery]"] || []).map((file) => ({ url: file.path, filename: file.filename }));
     //Owner
     newListing.owner = req.user._id;
+    if (req.user.role !== "host") await req.user.updateOne({ role: "host" });
     // Geoapify geocode
     const locationText = `${req.body.listing.location}, ${req.body.listing.country}`;
     const geoRes = await axios.get(
@@ -81,24 +165,29 @@ module.exports.renderEditForm = async (req, res) => {
   const listing = await Listing.findById(id);
   if (!listing) {
     req.flash("error", "This place could not be found.");
-    res.redirect("/listings");
-    // return res.redirect("/listings");
+    return res.redirect("/listings");
   }
-  let originalImageUrl = listing.image.url;
-  originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
+  let originalImageUrl = listing.image?.url || "/Icon/listing-img-pre.png";
+  if (listing.image?.url) originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
   res.render("listings/edit", { listing, originalImageUrl });
 };
 
 module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  const updates = { ...req.body.listing };
+  updates.amenities = Array.isArray(updates.amenities) ? updates.amenities : updates.amenities ? [updates.amenities] : [];
+  let listing = await Listing.findByIdAndUpdate(id, { ...updates }, { new: true, runValidators: true });
+  if (!listing) return res.status(404).render("listings/error", { statusCode: 404, message: "This place could not be found." });
 
-  if (typeof req.file !== "undefined" && req.file) {
-    let url = req.file.path;
-    let filename = req.file.filename;
+  const coverPhoto = req.files?.["listing[image]"]?.[0];
+  if (coverPhoto) {
+    let url = coverPhoto.path;
+    let filename = coverPhoto.filename;
     listing.image = { url, filename };
-    await listing.save();
   }
+  const galleryPhotos = req.files?.["listing[gallery]"] || [];
+  if (galleryPhotos.length) listing.images.push(...galleryPhotos.map((file) => ({ url: file.path, filename: file.filename })));
+  await listing.save();
 
   req.flash("success", "Your changes have been saved.");
   res.redirect(`/listings/${id}`); // redirect to show page
@@ -111,13 +200,31 @@ module.exports.destroyListing = async (req, res) => {
   res.redirect("/listings");
 };
 
+module.exports.removeGalleryImage = async (req, res) => {
+  if (!require("mongoose").Types.ObjectId.isValid(req.params.imageId)) {
+    req.flash("error", "That gallery photo could not be found.");
+    return res.redirect(`/listings/${req.params.id}/edit`);
+  }
+  const listing = await Listing.findById(req.params.id);
+  const photo = listing?.images?.id(req.params.imageId);
+  if (!listing || !photo) {
+    req.flash("error", "That gallery photo could not be found.");
+  } else {
+    photo.deleteOne();
+    await listing.save();
+    req.flash("success", "Gallery photo removed.");
+  }
+  res.redirect(`/listings/${req.params.id}/edit`);
+};
+
 //-------ADD-------
 //-------ADD-------
 module.exports.filter = async (req, res, next) => {
   let { id } = req.params;
-  let listings = await Listing.find({ category: { $all: [id] } });
-  console.log(listings);
+  let listings = await Listing.find({ category: { $all: [id] } }).populate("reviews", "rating").populate("owner", "username email fName image");
   if (listings.length != 0) {
+    decorateListings(listings, req.user);
+    res.locals.totalCount = listings.length;
     res.locals.success = `Showing stays in ${id}`;
     res.render("listings/index.ejs", { listings });
   } else {
@@ -131,9 +238,7 @@ module.exports.filterbtn = (req, res, next) => {
 };
 
 module.exports.search = async (req, res) => {
-  console.log(req.query.q);
-  let input = req.query.q.trim().replace(/\s+/g, " "); // remove start and end space and middle space remove and middle add one space------
-  console.log(input);
+  let input = textQuery(req.query.q).replace(/\s+/g, " ");
   if (input == "" || input == " ") {
     //search value empty
     req.flash("error", "Enter a destination or property name to search.");
@@ -152,21 +257,26 @@ module.exports.search = async (req, res) => {
     }
     flag = data[index] == " ";
   }
-  console.log(element);
-
+  const searchPattern = escapeRegex(element);
   let listings = await Listing.find({
-    title: { $regex: element, $options: "i" },
-  });
+    title: { $regex: searchPattern, $options: "i" },
+  }).populate("reviews", "rating").populate("owner", "username email fName image");
   if (listings.length != 0) {
+    decorateListings(listings, req.user);
+    res.locals.totalCount = listings.length;
     res.locals.success = `Showing stays matching “${element}”`;
     res.render("listings/index.ejs", { listings });
     return;
   }
   if (listings.length == 0) {
     listings = await Listing.find({
-      category: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
+      category: { $regex: searchPattern, $options: "i" },
+    })
+      .sort({ _id: -1 })
+      .populate("reviews", "rating").populate("owner", "username email fName image");
     if (listings.length != 0) {
+      decorateListings(listings, req.user);
+      res.locals.totalCount = listings.length;
       res.locals.success = `Showing stays matching “${element}”`;
       res.render("listings/index.ejs", { listings });
       return;
@@ -174,19 +284,27 @@ module.exports.search = async (req, res) => {
   }
   if (listings.length == 0) {
     listings = await Listing.find({
-      country: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
+      country: { $regex: searchPattern, $options: "i" },
+    })
+      .sort({ _id: -1 })
+      .populate("reviews", "rating").populate("owner", "username email fName image");
     if (listings.length != 0) {
+      decorateListings(listings, req.user);
+      res.locals.totalCount = listings.length;
       res.locals.success = `Showing stays matching “${element}”`;
       res.render("listings/index.ejs", { listings });
       return;
     }
   }
   if (listings.length == 0) {
-    let listings = await Listing.find({
-      location: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
+    listings = await Listing.find({
+      location: { $regex: searchPattern, $options: "i" },
+    })
+      .sort({ _id: -1 })
+      .populate("reviews", "rating").populate("owner", "username email fName image");
     if (listings.length != 0) {
+      decorateListings(listings, req.user);
+      res.locals.totalCount = listings.length;
       res.locals.success = `Showing stays matching “${element}”`;
       res.render("listings/index.ejs", { listings });
       return;
@@ -196,10 +314,12 @@ module.exports.search = async (req, res) => {
   const intDec = Number.isInteger(intValue); // check intValue is Number & Not Number return - true ya false
 
   if (listings.length == 0 && intDec) {
-    listings = await Listing.find({ price: { $lte: element } }).sort({
-      price: 1,
-    });
+    listings = await Listing.find({ price: { $lte: element } })
+      .sort({ price: 1 })
+      .populate("reviews", "rating").populate("owner", "username email fName image");
     if (listings.length != 0) {
+      decorateListings(listings, req.user);
+      res.locals.totalCount = listings.length;
       res.locals.success = `Showing stays under ₹${element}`;
       res.render("listings/index.ejs", { listings: listings });
       return;

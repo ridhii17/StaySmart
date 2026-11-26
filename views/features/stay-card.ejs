@@ -1,0 +1,21 @@
+<article class="smart-card">
+  <a class="smart-card__photo" href="/listings/<%= listing._id %>">
+    <img src="<%= listing.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= listing.title %>" loading="lazy" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';" />
+    <span class="smart-card__score"><i class="fa-solid fa-shield-heart"></i> Trust <%= trustScore ?? listing.trustScore ?? 0 %>/100</span>
+  </a>
+  <div class="smart-card__body">
+    <p class="smart-muted"><i class="fa-solid fa-location-dot"></i> <%= [listing.location, listing.country].filter(Boolean).join(", ") %></p>
+    <h3><a href="/listings/<%= listing._id %>"><%= listing.title %></a></h3>
+    <p class="smart-muted"><%= listing.propertyType || "Home" %> · Up to <%= listing.capacity || 2 %> guests</p>
+    <p class="smart-price">₹<%= Number(listing.price || 0).toLocaleString("en-IN") %> <small>/ night</small></p>
+    <% if (typeof score !== "undefined") { %>
+      <div class="smart-match"><span>Match score</span><strong><%= score %>/100</strong></div>
+      <p class="smart-reason">Recommended because it <%= reasons.join(", ") %>.</p>
+    <% } %>
+    <% if (typeof budgetLimit !== "undefined" && budgetLimit > 0) { %><p class="budget-fit <%= listing.price <= budgetLimit ? 'budget-fit--ok' : 'budget-fit--over' %>"><% if (listing.price <= budgetLimit) { %><i class="fa-solid fa-circle-check"></i> Within your nightly budget<% } else { %><i class="fa-solid fa-triangle-exclamation"></i> ₹<%= (listing.price - budgetLimit).toLocaleString("en-IN") %> above your nightly budget<% } %></p><% } %>
+    <div class="smart-card__actions">
+      <a class="smart-button smart-button--outline" href="/listings/<%= listing._id %>">View place</a>
+      <% if (currentUser) { %><form action="/wishlist/<%= listing._id %>/toggle" method="POST"><button class="smart-button smart-button--light" aria-label="<%= listing.isSaved ? 'Remove from saved places' : 'Save ' + listing.title %>"><i class="fa-<%= listing.isSaved ? 'solid' : 'regular' %> fa-heart"></i> <%= listing.isSaved ? 'Saved' : 'Save' %></button></form><% } %>
+    </div>
+  </div>
+</article>

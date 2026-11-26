@@ -5,6 +5,7 @@
   const selectedCategory = Array.isArray(listing.category)
     ? listing.category[0]
     : listing.category;
+  const selectedAmenities = listing.amenities || [];
 %>
 
 <main class="property-form-page">
@@ -42,6 +43,11 @@
         />
         <div class="valid-feedback">That name looks good.</div>
       </div>
+      <div class="property-form-row">
+        <div class="property-field"><label for="propertyType" class="form-label">Property type</label><select class="form-select" id="propertyType" name="listing[propertyType]"><% for (const type of ["Home","Apartment","Cabin","Guesthouse","Villa","Room","Hostel"]) { %><option <%= (listing.propertyType || "Home") === type ? "selected" : "" %>><%= type %></option><% } %></select></div>
+        <div class="property-field"><label for="capacity" class="form-label">Guest capacity</label><input class="form-control" id="capacity" name="listing[capacity]" type="number" min="1" max="30" value="<%= listing.capacity || 2 %>" required /></div>
+      </div>
+      <fieldset class="property-field property-amenities"><legend class="form-label">Amenities</legend><div><% for (const amenity of ["Wi-Fi","Kitchen","Workspace","Heating","Air conditioning","Washer","Parking","Pool","Public transport"]) { %><label><input type="checkbox" name="listing[amenities]" value="<%= amenity %>" <%= selectedAmenities.includes(amenity) ? "checked" : "" %> /> <%= amenity %></label><% } %></div></fieldset>
 
       <div class="property-field">
         <label for="category" class="form-label">Stay category</label>
@@ -61,7 +67,6 @@
         </select>
         <small class="property-field__hint">Choose the collection that best describes your place.</small>
       </div>
-
       <div class="property-field">
         <label for="description" class="form-label">About this place</label>
         <textarea
@@ -113,6 +118,8 @@
           <span>Choose a new photo to preview it here.</span>
         </div>
       </div>
+      <% if (listing.images?.length) { %><div class="property-photo-current"><span class="property-photo-label">Gallery photos</span><div class="listing-gallery-thumbs"><% for (const photo of listing.images) { %><div><img src="<%= photo.url %>" alt="Additional photo of <%= listing.title %>"/><button type="button" data-gallery-delete="/listings/<%= listing._id %>/gallery/<%= photo._id %>?_method=DELETE" aria-label="Remove gallery photo">Remove</button></div><% } %></div></div><% } %>
+      <div class="property-field"><label class="form-label" for="galleryPhotos">Add photos to gallery <span>(optional)</span></label><input id="galleryPhotos" name="listing[gallery]" type="file" accept="image/*" multiple class="form-control"/><small class="property-field__hint">New photos are added to the gallery.</small></div>
 
       <label class="property-confirm-photo" for="verify">
         <input type="checkbox" checked id="verify" required />
@@ -173,7 +180,7 @@
     </section>
 
     <div class="property-form-actions">
-      <p>Your updates will appear on your StaySphere page.</p>
+      <p>Your updates will appear on your StaySmart page.</p>
       <button type="submit" class="property-form-submit">
         Save changes <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </button>
@@ -183,3 +190,4 @@
 
 <script src="/js/editImg-size.js"></script>
 <script src="/js/image-preview.js"></script>
+<script src="/js/gallery-delete.js"></script>

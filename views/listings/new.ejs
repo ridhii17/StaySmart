@@ -3,7 +3,7 @@
 
 <main class="property-form-page">
   <header class="property-form-heading">
-    <p class="property-form-eyebrow">HOST WITH STAYSPHERE</p>
+    <p class="property-form-eyebrow">HOST WITH STAYSMART</p>
     <h1>Share your place with travelers</h1>
     <p>Introduce your space, add a few helpful details, and get it ready to welcome guests.</p>
   </header>
@@ -61,6 +61,12 @@
         <small class="property-field__hint">Choose the collection that best describes your place.</small>
       </div>
 
+      <div class="property-form-row">
+        <div class="property-field"><label for="propertyType" class="form-label">Property type</label><select class="form-select" id="propertyType" name="listing[propertyType]"><option>Home</option><option>Apartment</option><option>Cabin</option><option>Guesthouse</option><option>Villa</option><option>Room</option><option>Hostel</option></select></div>
+        <div class="property-field"><label for="capacity" class="form-label">Guest capacity</label><input class="form-control" id="capacity" name="listing[capacity]" type="number" min="1" max="30" value="2" required /></div>
+      </div>
+      <fieldset class="property-field property-amenities"><legend class="form-label">Amenities</legend><div><% for (const amenity of ["Wi-Fi","Kitchen","Workspace","Heating","Air conditioning","Washer","Parking","Pool","Public transport"]) { %><label><input type="checkbox" name="listing[amenities]" value="<%= amenity %>" /> <%= amenity %></label><% } %></div></fieldset>
+
       <div class="property-field">
         <label for="description" class="form-label">About this place</label>
         <textarea
@@ -99,6 +105,7 @@
           <span>Choose a photo to preview it here.</span>
         </div>
       </div>
+      <div class="property-field"><label class="form-label" for="galleryPhotos">Additional photos <span>(optional)</span></label><input id="galleryPhotos" name="listing[gallery]" type="file" accept="image/*" multiple class="form-control"/><small class="property-field__hint">Add up to eight photos to show more of your place.</small></div>
     </section>
 
     <section class="property-form-section property-form-section--last">

@@ -21,6 +21,8 @@ const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profile.js");
+const chatbotRouter = require("./routes/chatbot.js");
+const featuresRouter = require("./routes/features.js");
 
 //MongoDB
 const dbURL = process.env.ATLAS_URL;
@@ -43,6 +45,7 @@ app.set("views", path.join(__dirname, "views"));
 
 //middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "8kb" }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); // serve static files css work
 
@@ -89,14 +92,20 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
+  res.locals.search = { destination: "", checkIn: "", checkOut: "", guests: "", minPrice: "", maxPrice: "", propertyType: "", amenities: [] };
+  res.locals.totalCount = 0;
+  res.locals.page = 1;
+  res.locals.pageCount = 1;
   // res.locals.redirectUrl = req.session.redirectUrl;
   next();
 });
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", featuresRouter);
 app.use("/", userRouter);
 app.use("/profile", profileRouter);
+app.use("/api/chat", chatbotRouter);
 
 // for wrong route
 app.use((req, res, next) => {
@@ -105,6 +114,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong" } = err;
+  if (req.path.startsWith("/api/")) return res.status(statusCode).json({ error: message });
   // res.status(statusCode).send(message);
   res.render("listings/error", { statusCode, message });
 });

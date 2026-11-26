@@ -23,6 +23,10 @@ module.exports.saveRedirectUrl = (req, res, next) => {
 module.exports.isOwner = async (req, res, next) => {
   let { id } = req.params;
   let listing = await Listing.findById(id);
+  if (!listing || !listing.owner) {
+    req.flash("error", "This place could not be found.");
+    return res.redirect("/listings");
+  }
   if (!listing.owner._id.equals(res.locals.currentUser._id)) {
     req.flash("error", "Permission Denied!");
     return res.redirect(`/listings/${id}`);

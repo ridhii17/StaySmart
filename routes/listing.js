@@ -7,6 +7,10 @@ const ListingController = require("../controllers/listings");
 const multer = require("multer");
 const { storage } = require("../cloudConfig");
 const upload = multer({ storage });
+const listingImages = upload.fields([
+  { name: "listing[image]", maxCount: 1 },
+  { name: "listing[gallery]", maxCount: 8 },
+]);
 
 // -----ADD------
 // -----ADD------
@@ -20,7 +24,7 @@ router
   .post(
     //Create Route
     isLoggedIn,
-    upload.single("listing[image]"),
+    listingImages,
     validateListing,
     wrapAsync(ListingController.createListing)
   );
@@ -35,7 +39,7 @@ router
     //Update Route
     isLoggedIn,
     isOwner,
-    upload.single("listing[image]"),
+    listingImages,
     validateListing,
     wrapAsync(ListingController.updateListing)
   )
@@ -52,6 +56,13 @@ router.get(
   isLoggedIn,
   isOwner,
   wrapAsync(ListingController.renderEditForm)
+);
+
+router.delete(
+  "/:id/gallery/:imageId",
+  isLoggedIn,
+  isOwner,
+  wrapAsync(ListingController.removeGalleryImage)
 );
 
 module.exports = router;

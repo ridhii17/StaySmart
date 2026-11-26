@@ -10,7 +10,7 @@
 
 .property-form-eyebrow {
   margin: 0 0 0.55rem;
-  color: #b14c43;
+  color: #087f78;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -65,7 +65,7 @@
   place-items: center;
   border-radius: 11px;
   background: #fff0ed;
-  color: #b14c43;
+  color: #087f78;
   font-size: 0.73rem;
   font-weight: 800;
 }
@@ -290,8 +290,11 @@
   width: 16px;
   height: 16px;
   margin-top: 0.1rem;
-  accent-color: #c34f44;
+  accent-color: #087f78;
 }
+
+.listing-gallery-thumbs{display:flex;flex-wrap:wrap;gap:8px}.listing-gallery-thumbs>div{position:relative}.listing-gallery-thumbs img{width:100px;height:72px;object-fit:cover;border-radius:8px}.listing-gallery-thumbs button{position:absolute;right:4px;bottom:7px;border:0;border-radius:7px;background:#fff;color:#a14945;font-size:.67rem;font-weight:700;padding:3px 6px}
+.property-amenities{border:0;padding:0;margin:15px 0}.property-amenities legend{float:none;width:auto}.property-amenities>div{display:flex;flex-wrap:wrap;gap:9px 16px}.property-amenities label{font-size:.86rem;color:#475a62}.property-amenities input{accent-color:#087f78;margin-right:4px}
 
 @media (max-width: 640px) {
   .property-form-page {

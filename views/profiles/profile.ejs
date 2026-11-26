@@ -1,277 +1,267 @@
-<% layout("/layouts/boilerplate") %> 
-    <link rel="stylesheet" href="/css/profile.css">
-    <link rel="stylesheet" href="/css/delete-confirm.css">
-    <div class=""> 
-        <div class="main-profiles mt-2">
-            <div class="main-profile-detail">
-                <div class="profile-img">
-                    <% if(!currentUser.image || !currentUser.image.url) { %>
-  <img src="/Icon/DefaultImg.png">
-<% } else { %>
-  <img src="<%= currentUser.image.url %>">
-<% } %>
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/profile-dashboard.css" />
+<link rel="stylesheet" href="/css/delete-confirm.css" />
 
-                                <div id="change-image">
-                                    <a href="/change-image/<%= currentUser._id %>">
-                                        <i class="fa-solid fa-camera"></i>
-                                    </a>
-                                </div>
-                </div>
-                <div class="profile-user">
-                   <%
-  const fName = currentUser?.fName || "";
-  const lName = currentUser?.lName || "";
-  const fullName = `${fName} ${lName}`.trim();
+<%
+  const firstName = currentUser.fName || "";
+  const lastName = currentUser.lName || "";
+  const displayName = `${firstName} ${lastName}`.trim() || currentUser.username;
+  const profileImage = currentUser.image && currentUser.image.url
+    ? currentUser.image.url
+    : "/Icon/DefaultImg.png";
 %>
 
-<h3>
-  <span>Name :</span>
-  <%= fullName ? fullName : "N/A" %>
-</h3>
-
-                    <h3><span>Username : </span>@<%= currentUser.username %>
-                    </h3>
-                    <h4><span>Email : </span>
-                        <%= currentUser.email.split("").slice(0,2).join("") %>xxxxx@<%= currentUser.email.split("@")[1] %>
-                    </h4>
-                </div>
-                <div class="manage">
-                    <form action="/update-form/<%= currentUser._id %>" class="needs-validation">
-                        <button class="update">Update Ac</button>
-                    </form>
-                  <form method="post" action="/delete/<%= currentUser._id %>?_method=DELETE">
-  <button type="button" class="list-btn list-delete delete-confirm-trigger">
-    Delete Ac
-  </button>
-
-  <div class="fnx-fixed-dis">
-    <div class="delete-fnx">
-      <p><b>Are you sure</b></p>
-      <p>You want to delete your account?</p>
-
-      <button type="button" class="conf cancle-confirm">Cancel</button>
-      <button type="submit" class="conf delete-confirm">Confirm</button>
+<section class="account-dashboard">
+  <header class="dashboard-heading">
+    <div>
+      <p class="dashboard-eyebrow">YOUR STAYSMART</p>
+      <h1>Welcome back, <%= displayName %></h1>
+      <p>Manage your places, keep your profile current, and revisit the feedback you’ve shared.</p>
     </div>
+    <a class="dashboard-add-button" href="/listings/new">
+      <i class="fa-solid fa-plus" aria-hidden="true"></i>
+      Add a place
+    </a>
+  </header>
+
+  <section class="dashboard-profile-card" aria-label="Your profile">
+    <div class="dashboard-identity">
+      <div class="dashboard-avatar-wrap">
+        <img class="dashboard-avatar" src="<%= profileImage %>" alt="<%= displayName %>" />
+        <a class="dashboard-avatar-edit" href="/change-image/<%= currentUser._id %>" aria-label="Change profile photo">
+          <i class="fa-solid fa-camera" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div class="dashboard-identity__details">
+        <h2><%= displayName %></h2>
+        <p class="dashboard-username">@<%= currentUser.username %></p>
+        <p class="dashboard-email"><i class="fa-regular fa-envelope" aria-hidden="true"></i> <%= currentUser.email %></p>
+      </div>
+    </div>
+
+    <div class="dashboard-profile-actions">
+      <a class="dashboard-secondary-button" href="/update-form/<%= currentUser._id %>">
+        <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+        Edit profile
+      </a>
+      <form method="POST" action="/delete/<%= currentUser._id %>?_method=DELETE">
+        <button type="button" class="dashboard-danger-button delete-confirm-trigger">
+          Delete account
+        </button>
+        <div class="fnx-fixed-dis">
+          <div class="delete-fnx">
+            <p><b>Delete your account?</b></p>
+            <p>This action removes your account and its associated content.</p>
+            <div class="dashboard-confirm-actions">
+              <button type="button" class="conf cancle-confirm">Keep account</button>
+              <button type="submit" class="conf delete-confirm">Delete account</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <nav class="dashboard-quick-links" aria-label="StaySmart travel tools">
+    <a href="/my-trips"><i class="fa-solid fa-suitcase-rolling"></i><span><strong>My Trips</strong><small>Reservations · <%= bookingCount %></small></span><i class="fa-solid fa-arrow-right"></i></a>
+    <a href="/wishlist"><i class="fa-regular fa-heart"></i><span><strong>Saved places</strong><small>Shortlist · <%= savedCount %></small></span><i class="fa-solid fa-arrow-right"></i></a>
+    <a href="/trips"><i class="fa-solid fa-people-group"></i><span><strong>Group planner</strong><small>Plans · <%= tripCount %></small></span><i class="fa-solid fa-arrow-right"></i></a>
+    <a href="/host/bookings"><i class="fa-solid fa-calendar-check"></i><span><strong>Host bookings</strong><small>Reservations · <%= hostReservations %></small></span><i class="fa-solid fa-arrow-right"></i></a>
+  </nav>
+
+  <section class="dashboard-stats" aria-label="Your StaySmart activity">
+    <article class="dashboard-stat-card">
+      <span class="dashboard-stat-icon dashboard-stat-icon--places"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
+      <div><span>Places published</span><strong><%= allListing.length %></strong></div>
+    </article>
+    <article class="dashboard-stat-card">
+      <span class="dashboard-stat-icon dashboard-stat-icon--reviews"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i></span>
+      <div><span>Reviews shared</span><strong><%= allReview.length %></strong></div>
+    </article>
+    <article class="dashboard-stat-card dashboard-stat-card--tip">
+      <span class="dashboard-stat-icon dashboard-stat-icon--tip"><i class="fa-regular fa-lightbulb" aria-hidden="true"></i></span>
+      <div><span>Quick tip</span><strong>Fresh photos help your place stand out.</strong></div>
+    </article>
+  </section>
+
+  <div class="dashboard-tabs" role="tablist" aria-label="Account content">
+    <button
+      class="dashboard-tab is-active"
+      id="placesTab"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="placesPanel"
+    >
+      Your places <span><%= allListing.length %></span>
+    </button>
+    <button
+      class="dashboard-tab"
+      id="reviewsTab"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="reviewsPanel"
+    >
+      Your reviews <span><%= allReview.length %></span>
+    </button>
   </div>
-</form>
 
-                </div>
+  <section class="dashboard-panel" id="placesPanel" role="tabpanel" aria-labelledby="placesTab">
+    <div class="dashboard-section-heading">
+      <div>
+        <p class="dashboard-section-eyebrow">YOUR HOSTING</p>
+        <h2>Places you manage</h2>
+        <p>Update details, review your photos, or open a place page.</p>
+      </div>
+      <% if (allListing.length > 0) { %>
+        <form method="POST" action="/profile/all-listings-delete/<%= currentUser._id %>?_method=DELETE">
+          <button type="button" class="dashboard-remove-all delete-confirm-trigger">Remove all places</button>
+          <div class="fnx-fixed-dis">
+            <div class="delete-fnx">
+              <p><b>Remove all your places?</b></p>
+              <p>This will permanently remove every place you’ve published.</p>
+              <div class="dashboard-confirm-actions">
+                <button type="button" class="conf cancle-confirm">Cancel</button>
+                <button type="submit" class="conf delete-confirm">Remove all</button>
+              </div>
             </div>
-            <div class="manage manage-hide">
-                <form action="/update-form/<%= currentUser._id %>" class="needs-validation">
-                    <button class="update">Update Ac</button>
-                </form>
-                <form method="post" action="/delete/<%= currentUser._id %>?_method=DELETE" class="needs-validation">
-                    <button type="button" class="deleteAll delete-list delete-confirm-trigger">Delete All</button>
-
-                    <div class="fnx-fixed-dis">
-                        <div class="delete-fnx" style="display: none;">
-                            <p><b>Are you sure</b></p>
-                            <p>you want to delete your account?</p>
-                            <div class="conf cancle-confirm">Cancel</div>
-                            <button class="conf delete-confirm">Confirm</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="choose-list">
-                <div>
-                    <label for="listBtn"><b>Your places</b></label>
-                    <input type="radio" name="listing" id="listBtn" checked>
-                </div>
-                <div>
-                    <label for="reviBtn"><b>Reviews</b></label>
-                    <input type="radio" name="listing" id="reviBtn">
-                </div>
-            </div>
-        </div>
-
-
-        <!-- reviews show -->
-        <div id="review-box-start" style="display: none;">
-            <hr>
-            <div class="listing-count">
-                <h3 class="index-res">@<%= currentUser.username %> Created&nbsp;<b class="text-success fs-4">
-                            <%= allReview.length %>
-                        </b>&nbsp;Reviews</h3>
-                <form method="post" action="/profile/all-reviews-delete/<%= currentUser._id %>?_method=DELETE"
-                    class="needs-validation">
-                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
->Delete All</button>
-                    <div class="fnx-fixed-dis">
-                        <div class="delete-fnx" style="display: none;">
-                            <p>Are you sure you want to delete the entire reviews?</p>
-                            <div class="conf cancle-confirm">Cancel</div>
-                            <button class="conf delete-confirm">Confirm</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-1 profile-box">
-                <% for (const review of allReview) { %>
-                    <div class="listing-link">
-                        <div class="card col listing-card index-res">
-                            <div class="index-res-img">
-                                <div class="card-body mt-1 ms-2" id="review-body">
-                                    <span><b>Date :</b>
-                                        <%= review.createAt.toString().split(" ").slice(1,4).join(" -") %>
-                                    </span><br>
-                                    <span><b>Time :</b>
-                                        <%= review.createAt.toString().split(" ")[4] %></span><br>
-                                    <span><b>Comment :</b> <%= review.comment %></span><br>
-                                    <span class=" ratingBox"><b>Rating : &nbsp;</b>
-                                            <p class="starability-result" data-rating="<%= review.rating %>"></p>
-                                    </span>
-                                </div>
-                                <div class="lists-btn mt-1">
-                                    <button class="list-btn list-show"><a
-                                            href="/listings/<%= review.listing %>">Show</a></button>
-                                    <form method="post"
-                                        action="/profile/review/<%= review.listing %>/<%= review._id %>?_method=DELETE"
-                                        class="needs-validation">
-                                        <button type="reset" class="list-btn list-delete"
-                                            class="delete-confirm-trigger"
->Delete</button>
-                                        <div class="fnx-fixed-dis">
-                                            <div class="delete-fnx" style="display: none;">
-                                                <p>I want to delete this review.</p>
-                                                <p>"<%= review.comment %>"</p>
-                                                <div class="conf cancle-confirm">Cancel</div>
-                                                <button class="conf delete-confirm">Confirm</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-            </div>
-        </div>
-
-
-        <!-- places you host -->
-        <hr>
-        <div id="listing-box">
-            <div class="listing-count">
-                <h3 class="index-res">Your places <span class="text-success fs-4"><%= allListing.length %></span></h3>
-                <form method="post" action="/profile/all-listings-delete/<%= currentUser._id %>?_method=DELETE"
-                    class="needs-validation">
-                    <a href="/listings/new" class="deleteAll create-list">Add a place</a>
-                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
->Remove all</button>
-                    <div class="fnx-fixed-dis">
-                        <div class="delete-fnx" style="display: none;">
-                            <p>Are you sure you want to remove all your places?</p>
-                            <div class="conf cancle-confirm">Cancel</div>
-                            <button class="conf delete-confirm">Confirm</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-1 profile-box">
-                <% for (const listing of allListing) { %>
-                    <div class="listing-link">
-                        <div class="card col listing-card index-res">
-                            <div class="index-res-img">
-                                <div class="card-img">
-                                    <img src="<%= listing.image && listing.image.url ? listing.image.url : '/Icon/listing-img-pre.png' %>" class="card-img-top" alt="<%= listing.title %>" onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';" />
-                                </div>
-                                <div class="card-body mt-1 ms-2">
-                                    <p class="card-text" style="display: block;">
-                                        <b>
-                                            <%= listing.title %>
-                                        </b> <br>
-                                        <span>&nbsp;<%= listing.location %>, <%= listing.country %></span>
-                                    </p>
-                                </div>
-                                <div class="lists-btn mt-1">
-                                    <button class="list-btn list-show"><a
-                                            href="/listings/<%= listing._id %>">View</a></button>
-                                    <form method="post" action="/profile/listing/<%= listing._id %>?_method=DELETE"
-                                        class="needs-validation">
-                                        <button type="reset" class="list-btn list-delete"
-                                            class="delete-confirm-trigger"
->Delete</button>
-                                        <div class="fnx-fixed-dis">
-                                            <div class="delete-fnx" style="display: none;">
-                                                <p>Remove this place?</p>
-                                                <p>"<%= listing.title %>"</p>
-                                                <div class="conf cancle-confirm">Cancel</div>
-                                                <button class="conf delete-confirm">Confirm</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-            </div>
-        </div>
-        <hr>
-
-
-        <!-- reviews show -->
-        <div id="review-box-end">
-            <div class="listing-count">
-                <h3 class="index-res">@<%= currentUser.username %> Created&nbsp;<b class="text-success fs-4">
-                            <%= allReview.length %>
-                        </b>&nbsp;Reviews</h3>
-                <form method="post" action="/profile/all-reviews-delete/<%= currentUser._id %>?_method=DELETE"
-                    class="needs-validation">
-                    <button type="reset" class="deleteAll delete-list" class="delete-confirm-trigger"
->Delete All</button>
-                    <div class="fnx-fixed-dis">
-                        <div class="delete-fnx" style="display: none;">
-                            <p>Are you sure you want to delete the entire reviews?</p>
-                            <div class="conf cancle-confirm">Cancel</div>
-                            <button class="conf delete-confirm">Confirm</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-1 profile-box">
-                <% for (const review of allReview) { %>
-                    <div class="listing-link">
-                        <div class="card col listing-card index-res">
-                            <div class="index-res-img">
-                                <div class="card-body mt-1 ms-2" id="review-body">
-                                    <span><b>Date :</b>
-                                        <%= review.createAt.toString().split(" ").slice(1,4).join(" -") %>
-                                    </span><br>
-                                    <span><b>Time :</b>
-                                        <%= review.createAt.toString().split(" ")[4] %></span><br>
-                                    <span><b>Comment :</b> <%= review.comment %></span><br>
-                                    <span class=" ratingBox"><b>Rating : &nbsp;</b>
-                                            <p class="starability-result" data-rating="<%= review.rating %>"></p>
-                                    </span>
-                                </div>
-                                <div class="lists-btn mt-1">
-                                    <button class="list-btn list-show"><a
-                                            href="/listings/<%= review.listing %>">Show</a></button>
-                                    <form method="post"
-                                        action="/profile/review/<%= review.listing %>/<%= review._id %>?_method=DELETE"
-                                        class="needs-validation">
-                                        <button type="reset" class="list-btn list-delete"
-                                            class="delete-confirm-trigger"
->Delete</button>
-                                        <div class="fnx-fixed-dis">
-                                            <div class="delete-fnx" style="display: none;">
-                                                <p>I want to delete this review.</p>
-                                                <p>"<%= review.comment %>"</p>
-                                                <div class="conf cancle-confirm">Cancel</div>
-                                                <button class="conf delete-confirm">Confirm</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-            </div>
-        </div>
+          </div>
+        </form>
+      <% } %>
     </div>
-    <script src="/js/delete-confirm.js"></script>
-    <script src="/js/profile.js"></script>
+
+    <% if (allListing.length > 0) { %>
+      <div class="dashboard-place-grid">
+        <% for (const place of allListing) {
+          const placeLocation = [...new Set([place.location, place.country].filter(Boolean))].join(", ");
+          const placeImage = place.image && place.image.url ? place.image.url : "/Icon/listing-img-pre.png";
+        %>
+          <article class="dashboard-place-card">
+            <a class="dashboard-place-card__image" href="/listings/<%= place._id %>">
+              <img
+                src="<%= placeImage %>"
+                alt="<%= place.title %>"
+                loading="lazy"
+                onerror="this.onerror=null;this.src='/Icon/listing-img-pre.png';"
+              />
+            </a>
+            <div class="dashboard-place-card__body">
+              <p class="dashboard-place-card__location"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <%= placeLocation %></p>
+              <h3><%= place.title %></h3>
+              <p class="dashboard-place-card__price">₹<%= place.price ? place.price.toLocaleString("en-IN") : "—" %> <span>/ night</span></p>
+              <div class="dashboard-place-card__actions">
+                <a href="/listings/<%= place._id %>" class="dashboard-view-link">View place</a>
+                <a href="/listings/<%= place._id %>/edit" class="dashboard-edit-link">Edit</a>
+                <form method="POST" action="/profile/listing/<%= place._id %>?_method=DELETE">
+                  <button type="button" class="dashboard-icon-button delete-confirm-trigger" aria-label="Remove <%= place.title %>">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                  <div class="fnx-fixed-dis">
+                    <div class="delete-fnx">
+                      <p><b>Remove this place?</b></p>
+                      <p>“<%= place.title %>” will no longer appear in Explore.</p>
+                      <div class="dashboard-confirm-actions">
+                        <button type="button" class="conf cancle-confirm">Cancel</button>
+                        <button type="submit" class="conf delete-confirm">Remove place</button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </article>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="dashboard-empty-state">
+        <span><i class="fa-solid fa-house-chimney-window" aria-hidden="true"></i></span>
+        <h3>Your next place starts here</h3>
+        <p>Add a property, a clear cover photo, and a few details for travelers.</p>
+        <a href="/listings/new" class="dashboard-add-button">Create your first place</a>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="dashboard-panel" id="reviewsPanel" role="tabpanel" aria-labelledby="reviewsTab" hidden>
+    <div class="dashboard-section-heading">
+      <div>
+        <p class="dashboard-section-eyebrow">YOUR FEEDBACK</p>
+        <h2>Reviews you’ve shared</h2>
+        <p>Your notes help other travelers choose a place with confidence.</p>
+      </div>
+      <% if (allReview.length > 0) { %>
+        <form method="POST" action="/profile/all-reviews-delete/<%= currentUser._id %>?_method=DELETE">
+          <button type="button" class="dashboard-remove-all delete-confirm-trigger">Remove all reviews</button>
+          <div class="fnx-fixed-dis">
+            <div class="delete-fnx">
+              <p><b>Remove all your reviews?</b></p>
+              <p>This will permanently remove the feedback you’ve shared.</p>
+              <div class="dashboard-confirm-actions">
+                <button type="button" class="conf cancle-confirm">Cancel</button>
+                <button type="submit" class="conf delete-confirm">Remove all</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      <% } %>
+    </div>
+
+    <% if (allReview.length > 0) { %>
+      <div class="dashboard-review-list">
+        <% for (const review of allReview) {
+          const reviewedPlace = review.listing;
+        %>
+          <article class="dashboard-review-card">
+            <div class="dashboard-review-card__main">
+              <div class="dashboard-review-card__meta">
+                <span class="dashboard-review-card__icon"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i></span>
+                <div>
+                  <% if (reviewedPlace) { %>
+                    <a href="/listings/<%= reviewedPlace._id %>"><%= reviewedPlace.title %></a>
+                    <p><%= [reviewedPlace.location, reviewedPlace.country].filter(Boolean).join(", ") %></p>
+                  <% } else { %>
+                    <strong>Place no longer available</strong>
+                    <p>Review shared on StaySmart</p>
+                  <% } %>
+                </div>
+              </div>
+              <div class="dashboard-review-card__rating">
+                <span class="starability-result" data-rating="<%= review.rating %>"></span>
+                <time datetime="<%= new Date(review.createAt).toISOString() %>"><%= new Date(review.createAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) %></time>
+              </div>
+              <p class="dashboard-review-card__comment"><%= review.comment %></p>
+            </div>
+            <% if (reviewedPlace) { %>
+              <form method="POST" action="/profile/review/<%= reviewedPlace._id %>/<%= review._id %>?_method=DELETE">
+                <button type="button" class="dashboard-icon-button dashboard-icon-button--remove delete-confirm-trigger" aria-label="Remove this review">
+                  <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                </button>
+                <div class="fnx-fixed-dis">
+                  <div class="delete-fnx">
+                    <p><b>Remove this review?</b></p>
+                    <p>Your feedback will be removed from this place.</p>
+                    <div class="dashboard-confirm-actions">
+                      <button type="button" class="conf cancle-confirm">Cancel</button>
+                      <button type="submit" class="conf delete-confirm">Remove review</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            <% } %>
+          </article>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="dashboard-empty-state dashboard-empty-state--compact">
+        <span><i class="fa-regular fa-star" aria-hidden="true"></i></span>
+        <h3>You haven’t shared a review yet</h3>
+        <p>Visit a place you know and share a helpful note for the next traveler.</p>
+        <a href="/listings" class="dashboard-secondary-button">Explore places</a>
+      </div>
+    <% } %>
+  </section>
+</section>
+
+<script src="/js/delete-confirm.js"></script>
+<script src="/js/profile.js"></script>

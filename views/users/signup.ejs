@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/css/auth-account.css" />
 
 <div class="row -3">
-  <h1 class="col-6 offset-3">Sign Up on StaySphere</h1>
+  <h1 class="col-6 offset-3">Sign Up on StaySmart</h1>
   <h4 class="col-6 offset-3">Have an account? <a href="/login">Log In</a></h4>
   <div class="col-6 offset-3">
     <form action="/signup" method="post" class="needs-validation" novalidate>
@@ -62,6 +62,14 @@
         />
         <div class="valid-feedback">Looks good!</div>
         <div class="invalid-feedback">Email should be valid</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="role" class="form-label">How will you use StaySmart?</label>
+        <select class="form-select" id="role" name="role">
+          <option value="guest" selected>Find and book stays</option>
+          <option value="host">Host a place and welcome guests</option>
+        </select>
       </div>
 
       <div class="mb-3">

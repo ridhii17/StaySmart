@@ -1,12 +1,19 @@
 const Listing = require("../models/listing");
 const Review = require("../models/review");
+const Booking = require("../models/booking");
+const Trip = require("../models/trip");
 
 module.exports.profile = async (req, res) => {
   let allListing = await Listing.find({ owner: req.user._id })
     .populate("owner")
     .sort({ _id: -1 });
-  let allReview = await Review.find({ author: req.user._id });
-  res.render("profiles/profile.ejs", { allListing, allReview });
+  let allReview = await Review.find({ author: req.user._id })
+    .populate("listing", "title image location country")
+    .sort({ createAt: -1 });
+  const myBookings = await Booking.find({ guest: req.user._id, status: "confirmed" }).select("_id");
+  const hostReservations = allListing.length ? await Booking.countDocuments({ listing: { $in: allListing.map((place) => place._id) }, status: "confirmed" }) : 0;
+  const tripCount = await Trip.countDocuments({ owner: req.user._id });
+  res.render("profiles/profile.ejs", { allListing, allReview, bookingCount: myBookings.length, hostReservations, tripCount, savedCount: req.user.savedListings?.length || 0 });
 };
 
 module.exports.allListingDestroy = async (req, res, next) => {
@@ -33,7 +40,7 @@ module.exports.allReviewDestroy = async (req, res, next) => {
     });
     await Review.findByIdAndDelete(reviewOne._id);
   }
-  req.flash("success", `Reviews ${allReview.length} Deleted!`);
+  req.flash("success", `${allReview.length} reviews removed.`);
   res.redirect("/profile");
 };
 
@@ -41,6 +48,6 @@ module.exports.profileDestroyReview = async (req, res, next) => {
   let { id, reviewId } = req.params;
   await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
   await Review.findByIdAndDelete(reviewId);
-  req.flash("success", "Review Deleted!");
+  req.flash("success", "Your review has been removed.");
   res.redirect("/profile");
 };

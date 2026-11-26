@@ -9,6 +9,10 @@ module.exports.listingSchema = Joi.object({
     price: Joi.number().required().min(0),
     image: Joi.string().allow("", null),
     category: Joi.allow(""),
+    propertyType: Joi.string().max(50).allow(""),
+    capacity: Joi.number().integer().min(1).max(30),
+    amenities: Joi.array().items(Joi.string().max(50)).max(30).single(),
+    gallery: Joi.allow("", null),
   }).required(),
 });
 

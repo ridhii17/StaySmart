@@ -1,26 +1,17 @@
-console.log("listingData:", listingData);
+const mapElement = document.getElementById("map");
 
-if (
-  !listingData ||
-  !listingData.coordinates ||
-  listingData.coordinates.length !== 2
-) {
-  console.log("Coordinates missing, map not loaded.");
-} else {
-  const [lon, lat] = listingData.coordinates;
+if (mapElement && window.L && Array.isArray(listingData?.coordinates) && listingData.coordinates.length === 2) {
+  const [longitude, latitude] = listingData.coordinates;
+  window.stayMap = L.map(mapElement).setView([latitude, longitude], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap contributors",
+  }).addTo(window.stayMap);
 
-  const map = L.map("map").setView([lat, lon], 12);
-
-  L.tileLayer(
-    `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${geoapifyKey}`,
-    {
-      maxZoom: 20,
-      attribution: "© OpenStreetMap contributors, © Geoapify",
-    }
-  ).addTo(map);
-
-  L.marker([lat, lon])
-    .addTo(map)
-    .bindPopup(`<b>${listingData.title}</b>`)
-    .openPopup();
+  const title = document.createElement("span");
+  title.textContent = listingData.title || "Stay location";
+  L.marker([latitude, longitude]).addTo(window.stayMap).bindPopup(title).openPopup();
+  window.stayCoordinates = [longitude, latitude];
+} else if (mapElement) {
+  mapElement.innerHTML = '<p class="map-unavailable">Map coordinates are not available for this place yet.</p>';
 }

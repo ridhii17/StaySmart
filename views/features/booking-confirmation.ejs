@@ -1,0 +1,3 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/features.css" />
+<main class="smart-page smart-narrow"><div class="smart-success"><span><i class="fa-solid fa-check"></i></span><p class="smart-eyebrow">CONFIRMED</p><h1>Your trip is booked.</h1><p>This is a demo reservation; no payment was processed.</p><div class="smart-panel"><h2><%= listing.title %></h2><p><%= booking.checkIn.toLocaleDateString("en-IN") %> – <%= booking.checkOut.toLocaleDateString("en-IN") %> · <%= booking.guests %> guests</p><strong>₹<%= booking.total.toLocaleString("en-IN") %> total</strong></div><a class="smart-button" href="/my-trips">View My Trips</a></div></main>

@@ -21,6 +21,8 @@ const userSchema = new Schema({
     url: { type: String, default: "" },
     filename: { type: String, default: "" },
   },
+  role: { type: String, enum: ["guest", "host"], default: "guest" },
+  savedListings: [{ type: Schema.Types.ObjectId, ref: "Listing" }],
 });
 
 userSchema.plugin(passportLocalMongoose);

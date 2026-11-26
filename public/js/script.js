@@ -24,4 +24,17 @@
       false
     );
   });
+
+  document.querySelectorAll("[data-autodismiss-ms]").forEach((alert) => {
+    const delay = Number(alert.dataset.autodismissMs) || 3000;
+    window.setTimeout(() => {
+      if (!alert.isConnected) return;
+      if (window.bootstrap?.Alert) {
+        window.bootstrap.Alert.getOrCreateInstance(alert).close();
+      } else {
+        alert.classList.remove("show");
+        window.setTimeout(() => alert.remove(), 200);
+      }
+    }, delay);
+  });
 })();

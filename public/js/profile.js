@@ -1,14 +1,17 @@
-let reviewBoxStart = document.getElementById("review-box-start");
-let reviewBoxEnd = document.getElementById("review-box-end");
+(() => {
+  const tabs = [
+    { button: document.getElementById("placesTab"), panel: document.getElementById("placesPanel") },
+    { button: document.getElementById("reviewsTab"), panel: document.getElementById("reviewsPanel") },
+  ].filter(({ button, panel }) => button && panel);
 
-let listBtn = document.querySelector(".choose-list #listBtn");
-let reviBtn = document.querySelector(".choose-list #reviBtn");
-
-listBtn.addEventListener("click", () => {
-  reviewBoxStart.style.display = "none";
-  reviewBoxEnd.style.display = "inline";
-});
-reviBtn.addEventListener("click", () => {
-  reviewBoxStart.style.display = "inline";
-  reviewBoxEnd.style.display = "none";
-});
+  tabs.forEach(({ button, panel }) => {
+    button.addEventListener("click", () => {
+      tabs.forEach((tab) => {
+        const active = tab.button === button;
+        tab.button.classList.toggle("is-active", active);
+        tab.button.setAttribute("aria-selected", String(active));
+        tab.panel.hidden = !active;
+      });
+    });
+  });
+})();

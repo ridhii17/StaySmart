@@ -308,9 +308,15 @@
   </div>
 </div>
 <section class="stays-results" aria-labelledby="stays-heading">
+  <div class="smart-shortcuts">
+    <a href="/smart-picks"><i class="fa-solid fa-wand-magic-sparkles"></i> Smart picks</a>
+    <a href="/trips"><i class="fa-solid fa-people-group"></i> Group trip planner</a>
+    <a href="/students"><i class="fa-solid fa-graduation-cap"></i> Student mode</a>
+    <% if (currentUser) { %><a href="/compare"><i class="fa-solid fa-code-compare"></i> Compare saved options</a><% } %>
+  </div>
   <div class="stays-intro">
     <div class="stays-intro__copy">
-      <p class="stays-eyebrow">STAYSPHERE · PLACES TO STAY</p>
+      <p class="stays-eyebrow">STAYSMART · PLACES TO STAY</p>
       <h1 id="stays-heading">Find a stay that feels like yours.</h1>
       <p class="stays-intro__description">
         Browse distinctive homes for a quick escape, a city break, or a longer stay.
@@ -318,9 +324,22 @@
     </div>
     <div class="stays-count" aria-label="Number of stays">
       <i class="fa-solid fa-house-chimney-window" aria-hidden="true"></i>
-      <span><strong><%= listings.length.toLocaleString("en-IN") %></strong> places to explore</span>
+      <span><strong><%= totalCount.toLocaleString("en-IN") %></strong> places to explore</span>
     </div>
   </div>
+
+  <form class="stay-search-tools" action="/listings" method="GET">
+    <label>Destination<input name="destination" value="<%= search.destination %>" placeholder="City, region or place" /></label>
+    <label>Check-in<input type="date" name="checkIn" value="<%= search.checkIn %>" /></label>
+    <label>Check-out<input type="date" name="checkOut" value="<%= search.checkOut %>" /></label>
+    <label>Guests<input type="number" name="guests" min="1" max="30" value="<%= search.guests %>" placeholder="Any" /></label>
+    <label>Min ₹ / night<input type="number" name="minPrice" min="0" value="<%= search.minPrice %>" placeholder="0" /></label>
+    <label>Max ₹ / night<input type="number" name="maxPrice" min="0" value="<%= search.maxPrice %>" placeholder="Any" /></label>
+    <label>Property type<select name="propertyType"><option value="">Any type</option><% for (const type of ["Home","Apartment","Cabin","Guesthouse","Villa","Room","Hostel"]) { %><option value="<%= type %>" <%= search.propertyType === type ? "selected" : "" %>><%= type %></option><% } %></select></label>
+    <button type="submit"><i class="fa-solid fa-sliders"></i> Search stays</button>
+    <fieldset class="stay-amenity-filters"><legend>Amenities</legend><% for (const amenity of ["Wi-Fi","Kitchen","Workspace","Parking","Pool"]) { %><label><input type="checkbox" name="amenities" value="<%= amenity %>" <%= search.amenities.includes(amenity) ? "checked" : "" %> /> <%= amenity %></label><% } %></fieldset>
+  </form>
+  <div class="stay-search-meta"><span><%= totalCount %> matching places</span><% if (currentUser) { %><span class="compare-selection" id="compareSelection">Select up to 4 places to compare <a href="/compare" id="compareLink">Compare now</a></span><% } %></div>
 
   <% if (listings.length > 0) { %>
     <div class="stay-grid">
@@ -328,8 +347,19 @@
         const locationParts = [listing.location, listing.country].filter(Boolean);
         const locationLabel = [...new Set(locationParts)].join(", ");
         const categoryLabel = Array.isArray(listing.category) ? listing.category[0] : listing.category;
+        const reviewRatings = (listing.reviews || []).map((review) => review.rating).filter(Number.isFinite);
+        const cardAverageRating = reviewRatings.length
+          ? (reviewRatings.reduce((sum, rating) => sum + rating, 0) / reviewRatings.length).toFixed(1)
+          : null;
       %>
         <article class="stay-card">
+          <div class="stay-card__tools">
+            <% if (currentUser) { %>
+              <form action="/wishlist/<%= listing._id %>/toggle" method="POST"><button class="stay-tool-button <%= listing.isSaved ? 'is-saved' : '' %>" type="submit" aria-label="<%= listing.isSaved ? 'Remove saved place' : 'Save place' %>"><i class="fa-<%= listing.isSaved ? 'solid' : 'regular' %> fa-heart"></i></button></form>
+              <label class="stay-compare-check"><input type="checkbox" class="compare-place" value="<%= listing._id %>" /><span>Compare</span></label>
+            <% } %>
+            <% if (listing.trustScore) { %><span class="stay-trust-score"><i class="fa-solid fa-shield-heart"></i> <%= listing.trustScore %></span><% } %>
+          </div>
           <a
             href="/listings/<%= listing._id %>"
             class="stay-card__link"
@@ -353,6 +383,15 @@
                 <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                 <span><%= locationLabel || "Location available on request" %></span>
               </div>
+              <div class="stay-card__reviews">
+                <% if (cardAverageRating) { %>
+                  <i class="fa-solid fa-star" aria-hidden="true"></i>
+                  <strong><%= cardAverageRating %></strong>
+                  <span>(<%= reviewRatings.length %> <%= reviewRatings.length === 1 ? "review" : "reviews" %>)</span>
+                <% } else { %>
+                  <span>No reviews yet</span>
+                <% } %>
+              </div>
               <h2 class="stay-card__title"><%= listing.title %></h2>
               <p class="stay-card__description"><%= listing.description %></p>
               <div class="stay-card__footer">
@@ -375,7 +414,10 @@
       <a href="/listings" class="stays-empty__button">Explore all stays</a>
     </div>
   <% } %>
+  <% const amenitiesQuery = search.amenities.map((amenity) => `&amenities=${encodeURIComponent(amenity)}`).join(""); %>
+  <% if (pageCount > 1) { %><nav class="stay-pagination" aria-label="Explore pages"><% if (page > 1) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %>&page=<%= page - 1 %>">← Previous</a><% } %><span>Page <%= page %> of <%= pageCount %></span><% if (page < pageCount) { %><a href="?destination=<%= encodeURIComponent(search.destination) %>&checkIn=<%= encodeURIComponent(search.checkIn) %>&checkOut=<%= encodeURIComponent(search.checkOut) %>&guests=<%= search.guests %>&minPrice=<%= search.minPrice %>&maxPrice=<%= search.maxPrice %>&propertyType=<%= encodeURIComponent(search.propertyType) %><%= amenitiesQuery %>&page=<%= page + 1 %>">Next →</a><% } %></nav><% } %>
 </section>
 
  <script defer src="/js/filter.js"></script>
+ <script defer src="/js/compare.js"></script>
         

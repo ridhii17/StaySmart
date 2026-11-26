@@ -12,6 +12,7 @@ const listingSchema = new mongoose.Schema({
     url: String,
     filename: String,
   },
+  images: [{ url: String, filename: String }],
   price: Number,
   location: String,
   country: String,
@@ -40,6 +41,11 @@ const listingSchema = new mongoose.Schema({
   category: {
     type: [String],
   },
+  propertyType: { type: String, default: "Home" },
+  capacity: { type: Number, min: 1, default: 2 },
+  amenities: { type: [String], default: [] },
+  reservationLockToken: { type: String, select: false },
+  reservationLockUntil: { type: Date, select: false },
 });
 
 listingSchema.post("findOneAndDelete", async (listing) => {

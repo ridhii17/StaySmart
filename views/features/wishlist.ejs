@@ -1,0 +1,5 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/features.css" />
+<main class="smart-page"><header class="smart-hero"><div><p class="smart-eyebrow">YOUR SHORTLIST</p><h1>Saved places</h1><p>Keep favorites together, then compare your options before you book.</p></div><a class="smart-button" href="/compare">Compare places</a></header>
+  <% if (listings.length) { %><div class="smart-grid"><% for (const item of listings) { %><%- include("stay-card.ejs", { listing: item.listing, trustScore: item.trustScore }) %><% } %></div><% } else { %><div class="smart-empty"><h2>Your wishlist is ready</h2><p>Save a place from Explore or a recommendation to build your shortlist.</p><a class="smart-button" href="/listings">Explore places</a></div><% } %>
+</main>

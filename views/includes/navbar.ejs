@@ -1,10 +1,10 @@
 <link rel="stylesheet" href="/css/navbar.css" />
 
-<nav class="navbar navbar-expand-md sticky-top app-navbar">
+<nav class="navbar navbar-expand-lg sticky-top app-navbar">
   <div class="container-fluid app-navbar__inner">
-    <a class="navbar-brand app-brand" href="/listings" aria-label="StaySphere home">
-      <span class="app-brand__mark"><i class="fa-solid fa-house-chimney-window"></i></span>
-      <span>StaySphere</span>
+    <a class="navbar-brand app-brand" href="/listings" aria-label="StaySmart home">
+      <span class="app-brand__mark"><i class="fa-regular fa-compass"></i></span>
+      <span class="app-brand__name">StaySmart<small>Find Smarter Stays</small></span>
     </a>
 
     <button
@@ -43,7 +43,20 @@
 
         <li class="nav-item nav-right">
           <div class="nav-right-links">
-            <a class="nav-link nav-host-link" href="/listings/new">Become a host</a>
+            <details class="nav-quick-menu">
+              <summary>Travel tools</summary>
+              <div>
+                <a href="/smart-picks">Smart picks</a>
+                <a href="/students">Student mode</a>
+                <a href="/listings/new">Become a host</a>
+                <% if (currentUser) { %>
+                  <a href="/wishlist">Saved places</a>
+                  <a href="/my-trips">My trips</a>
+                  <a href="/trips">Group planner</a>
+                  <a href="/host/bookings">Host bookings</a>
+                <% } %>
+              </div>
+            </details>
             <% if (currentUser) { %>
               <a class="nav-link" href="/profile">Profile</a>
               <a class="nav-link nav-auth-link" href="/logout">Log out</a>

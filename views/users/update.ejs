@@ -1,133 +1,62 @@
 <% layout("/layouts/boilerplate") %>
-    <link rel="stylesheet" href="/css/button-style.css">
+<link rel="stylesheet" href="/css/account-settings.css" />
 
-    <div class="row mt-3 mx-auto">
-        <div class="col-md-8 mx-auto">
+<%
+  const accountPhoto = user.image?.url || "/Icon/DefaultImg.png";
+%>
 
-            <div class="update-change">
-                <div>
-                    <label for="detail-find">Update Details</label>
-                    <input type="radio" name="find" id="detail-find" checked>
-                </div>
-                <% if(!user.providerId){ %>
-                    <div>
-                        <label for="password-find">Update Password</label>
-                        <input type="radio" name="find" id="password-find">
-                    </div>
-                    <% } %>
-                        <div>
-                            <label for="image-find">Update Image</label>
-                            <input type="radio" name="find" id="image-find">
-                        </div>
-            </div>
+<main class="account-settings-page">
+  <a class="settings-back-link" href="/profile"><i class="fa-solid fa-arrow-left"></i> Back to Profile</a>
+  <header class="settings-heading">
+    <p class="settings-eyebrow">ACCOUNT SETTINGS</p>
+    <h1>Manage your account</h1>
+    <p>Update your profile details, password, or photo.</p>
+  </header>
 
-            <div id="password-box">
-                <h2>Update User Password</h2>
-                <form method="post" action="/update-password/<%= user._id %>" class="needs-validation" novalidate>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Old Password</label>
-                        <input id="password" type="password" placeholder="Enter Password" name="oldPassword"
-                            class="form-control border border-black border-opacity-50" minlength="8" required>
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">Please lengthen this text to 8 charaters or more.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">New Password</label>
-                        <input id="password" type="password" placeholder="Enter Password" name="newPassword"
-                            class="form-control border border-black border-opacity-50" minlength="8" required>
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">Please lengthen this text to 8 charaters or more.</div>
-                    </div>
-                    <button class="btn btn-primary styleBtn">Update</button>
-                </form>
-            </div>
+  <div class="settings-layout">
+    <nav class="settings-tabs" role="tablist" aria-label="Account settings">
+      <button class="settings-tab is-active" type="button" role="tab" id="detailsTab" aria-controls="detailsPanel" aria-selected="true" data-settings-tab="detailsPanel"><i class="fa-regular fa-user"></i> Profile details</button>
+      <% if (!user.providerId) { %><button class="settings-tab" type="button" role="tab" id="passwordTab" aria-controls="passwordPanel" aria-selected="false" data-settings-tab="passwordPanel"><i class="fa-solid fa-lock"></i> Password</button><% } %>
+      <button class="settings-tab" type="button" role="tab" id="imageTab" aria-controls="imagePanel" aria-selected="false" data-settings-tab="imagePanel"><i class="fa-regular fa-image"></i> Profile photo</button>
+    </nav>
 
+    <div class="settings-panels">
+      <section class="settings-panel" id="detailsPanel" role="tabpanel" aria-labelledby="detailsTab">
+        <div class="settings-panel-heading"><span class="settings-panel-icon"><i class="fa-regular fa-id-card"></i></span><div><h2>Profile details</h2><p>Keep your account information up to date.</p></div></div>
+        <form action="/update-account/<%= user._id %>" method="POST" class="settings-form needs-validation" novalidate>
+          <div class="settings-field-row">
+            <label>First name<input type="text" name="fName" value="<%= user.fName || '' %>" autocomplete="given-name" required /></label>
+            <label>Last name<input type="text" name="lName" value="<%= user.lName || '' %>" autocomplete="family-name" /></label>
+          </div>
+          <label>Username<input type="text" name="username" value="<%= user.username || '' %>" autocomplete="username" required /></label>
+          <label>Email address<input type="email" name="email" value="<%= user.email || '' %>" autocomplete="email" required /></label>
+          <div class="settings-form-actions"><a class="settings-cancel" href="/profile">Cancel</a><button type="submit" class="smart-button">Save changes</button></div>
+        </form>
+      </section>
 
-            <div id="detail-box">
-                <h2>Update User Details</h2>
-                <form action="/update-account/<%= user._id %>" method="post" class="needs-validation" novalidate>
-                    <div class="mb-3">
-                        <label for="fName" class="form-label">First Name</label>
-                        <input id="fName" type="text" placeholder="Enter First Name" name="fName"
-                            value="<%= user.fName %>" class="form-control border border-black border-opacity-50"
-                            required>
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">First Name should be valid</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lName" class="form-label">Last Name</label>
-                        <input id="lName" type="text" placeholder="Enter Last Name" name="lName"
-                            value="<%= user.lName %>" class="form-control border border-black border-opacity-50">
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">Last Name should be valid</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">@</span>
-                            </div>
-                            <input id="username" type="text" placeholder="Enter Username" name="username"
-                                value="<%= user.username %>" class="form-control border border-black border-opacity-50"
-                                required>
-                        </div>
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">Username should be valid</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input id="email" type="email" placeholder="Enter Email" name="email" value="<%= user.email %>"
-                            class="form-control border border-black border-opacity-50" required>
-                        <div class="valid-feedback">Looks good!</div>
-                        <div class="invalid-feedback">Email should be valid</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary styleBtn">Update</button>
-                </form>
-            </div>
+      <% if (!user.providerId) { %>
+        <section class="settings-panel" id="passwordPanel" role="tabpanel" aria-labelledby="passwordTab" hidden>
+          <div class="settings-panel-heading"><span class="settings-panel-icon"><i class="fa-solid fa-lock"></i></span><div><h2>Change password</h2><p>Choose a new password you haven’t used before.</p></div></div>
+          <form action="/update-password/<%= user._id %>" method="POST" class="settings-form needs-validation" novalidate>
+            <label>Current password<input type="password" name="oldPassword" autocomplete="current-password" minlength="8" required /></label>
+            <label>New password<input type="password" name="newPassword" autocomplete="new-password" minlength="8" required /></label>
+            <div class="settings-form-actions"><a class="settings-cancel" href="/profile">Cancel</a><button type="submit" class="smart-button">Update password</button></div>
+          </form>
+        </section>
+      <% } %>
 
-
-            <div id="image-box">
-                <h2>Update User Image</h2>
-                <form action="/update-image/<%= user._id %>" method="post" class="needs-validation"
-                    enctype="multipart/form-data" novalidate>
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Original Image Preview</label><br>
-                        <% if(!currentUser.image.url){ %>
-                            <img src="/Icon/navbar-icon-user.png" alt="Original Image" class="listingImg-update"
-                                id="update-img">
-                            <% }else{ %>
-                                <img src="<%= user.image.url %>" alt="Original Image" class="listingImg-update"
-                                    id="update-img">
-                                <% } %>
-                    </div>
-                    <div class=" row mb-3">
-                        <div class="col-10">
-                            <label for="image" class="form-label">Add Image</label>
-                            <input type="file" name="image" class="form-control border border-black border-opacity-50"
-                                id="verify-img" required onchange="previewImage()">
-                            <p id="errorContainer"></p>
-                        </div>
-                        <div class="col-2">
-                            <label class="form-control border border-white" style="margin-left: -15px;font-weight: 700;"
-                                for="verify">Verify</label>
-                            <input type="checkbox" id="verify"
-                                class="form-btn btn ms-2 border border-black border-opacity-50" required
-                                style="height: 25px; width:25px;">
-                            <div class="invalid-feedback">Varify</div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Add Image Preview</label><br>
-                        <div id="imagePreview">
-                            <img src="/Icon/update-img-pre.png" alt="demo">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary styleBtn">Update</button>
-                </form>
-            </div>
-        </div>
+      <section class="settings-panel" id="imagePanel" role="tabpanel" aria-labelledby="imageTab" hidden>
+        <div class="settings-panel-heading"><span class="settings-panel-icon"><i class="fa-regular fa-image"></i></span><div><h2>Profile photo</h2><p>Choose a clear image so hosts and guests can recognize you.</p></div></div>
+        <form action="/update-image/<%= user._id %>" method="POST" class="settings-form needs-validation" enctype="multipart/form-data" novalidate>
+          <div class="settings-photo-current"><img src="<%= accountPhoto %>" alt="Current profile photo" onerror="this.onerror=null;this.src='/Icon/DefaultImg.png';"/><span>Current photo</span></div>
+          <label>Choose a new photo<input type="file" name="image" accept="image/*" id="verify-img" required onchange="previewImage()" /></label>
+          <div id="imagePreview" class="settings-photo-preview"><span>Your new photo preview will appear here.</span></div>
+          <div class="settings-form-actions"><a class="settings-cancel" href="/profile">Cancel</a><button type="submit" class="smart-button">Save photo</button></div>
+        </form>
+      </section>
     </div>
+  </div>
+</main>
 
-    <script src="/js/newImg-size.js"></script>
-    <script src="/js/image-preview.js"></script>
-    <script src="/js/update.js"></script>
+<script src="/js/image-preview.js"></script>
+<script src="/js/update.js"></script>
