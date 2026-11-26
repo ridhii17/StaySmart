@@ -15,7 +15,9 @@ function priceInPaise(rupees) {
 
 async function refundCapturedPayment(paymentId, total, receipt) {
   const refund = await razorpay.refundPayment(paymentId, priceInPaise(total), receipt);
-  return refund.status === "processed" ? "refunded" : "refund_pending";
+  if (refund.status === "processed") return "refunded";
+  if (refund.status === "pending" || refund.status === "queued") return "refund_pending";
+  throw new Error("The payment provider did not accept the refund.");
 }
 
 async function makeBookingFromPaidIntent(intent, payment) {
@@ -106,11 +108,17 @@ module.exports.createOrder = async (req, res) => {
     expiresAt: new Date(Date.now() + 30 * 60 * 1000),
   };
   const receipt = `ss_${crypto.randomUUID().replaceAll("-", "").slice(0, 32)}`;
-  const order = await razorpay.createOrder({
-    amount: priceInPaise(price.total),
-    receipt,
-    notes: { listingId: String(listing._id), guestId: String(req.user._id) },
-  });
+  let order;
+  try {
+    order = await razorpay.createOrder({
+      amount: priceInPaise(price.total),
+      receipt,
+      notes: { listingId: String(listing._id), guestId: String(req.user._id) },
+    });
+  } catch (error) {
+    console.error("Razorpay order request failed:", error.response?.status || error.code || "request failed");
+    return res.status(502).json({ error: "Secure payment could not be started. Please try again in a moment." });
+  }
   const intent = await PaymentIntent.create({ ...intentData, providerOrderId: order.id });
   req.session.pendingPaymentIntentId = String(intent._id);
   req.session.pendingBooking = { ...pending, price, nightlyRate: Number(listing.price) };
@@ -133,15 +141,21 @@ module.exports.verifyPayment = async (req, res) => {
     return res.status(400).json({ error: "Payment verification failed. No reservation was created." });
   }
 
-  let payment = await razorpay.fetchPayment(paymentId);
-  const expectedAmount = priceInPaise(intent.total);
-  if (payment.order_id !== intent.providerOrderId || payment.amount !== expectedAmount || payment.currency !== "INR") {
-    return res.status(400).json({ error: "The payment amount or order did not match this reservation." });
+  let payment;
+  let result;
+  try {
+    payment = await razorpay.fetchPayment(paymentId);
+    const expectedAmount = priceInPaise(intent.total);
+    if (payment.order_id !== intent.providerOrderId || payment.amount !== expectedAmount || payment.currency !== "INR") {
+      return res.status(400).json({ error: "The payment amount or order did not match this reservation." });
+    }
+    if (payment.status === "authorized") payment = await razorpay.capturePayment(payment.id, expectedAmount);
+    if (payment.status !== "captured") return res.status(402).json({ error: "Payment has not been captured. Please try again or contact support." });
+    result = await makeBookingFromPaidIntent(intent, payment);
+  } catch (error) {
+    console.error("Razorpay payment confirmation failed:", error.response?.status || error.code || "request failed");
+    return res.status(502).json({ error: "Payment confirmation is delayed. Do not pay again; refresh My Trips shortly or contact support." });
   }
-  if (payment.status === "authorized") payment = await razorpay.capturePayment(payment.id, expectedAmount);
-  if (payment.status !== "captured") return res.status(402).json({ error: "Payment has not been captured. Please try again or contact support." });
-
-  const result = await makeBookingFromPaidIntent(intent, payment);
   if (result.expired) return res.status(409).json({ error: result.paymentStatus === "refunded" ? "Checkout expired; the payment was refunded." : "Checkout expired; a refund is being processed." });
   if (result.conflict) return res.status(409).json({ error: result.paymentStatus === "refunded" ? "The dates were booked first, so your payment was refunded." : "The dates were booked first; a refund is being processed." });
 
@@ -184,7 +198,7 @@ module.exports.issueBookingRefund = async (booking) => {
   const refund = await razorpay.refundPayment(
     booking.paymentId,
     priceInPaise(booking.total),
-    `cancel_${String(booking._id).slice(-30)}`,
+    `cancel_${String(booking._id).slice(-29)}`,
   );
   booking.paymentStatus = refund.status === "processed" ? "refunded" : "refund_pending";
   await booking.save();

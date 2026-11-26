@@ -393,6 +393,7 @@
                 <% } %>
               </div>
               <h2 class="stay-card__title"><%= listing.title %></h2>
+              <% if (listing.owner?.hostVerificationStatus === "verified") { %><span class="stay-card__verified-host"><i class="fa-solid fa-circle-check"></i> Verified host</span><% } %>
               <p class="stay-card__description"><%= listing.description %></p>
               <div class="stay-card__footer">
                 <p class="stay-card__price">

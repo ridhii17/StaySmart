@@ -4,7 +4,7 @@ const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn, rateLimit } = require("../middleware");
 const features = require("../controllers/features");
 
-router.get("/smart-picks", wrapAsync(features.smartPicks));
+router.get("/smart-picks", rateLimit({ scope: "ai-recommendations", windowMs: 10 * 60 * 1000, max: 10, skip: (req) => req.query.useAI !== "on" }), wrapAsync(features.smartPicks));
 router.get("/students", wrapAsync(features.students));
 router.get("/compare", wrapAsync(features.compare));
 router.get("/wishlist", isLoggedIn, wrapAsync(features.wishlist));

@@ -198,7 +198,7 @@ module.exports.rateLimit = ({ scope, windowMs, max, skip = () => false }) => asy
       counter = await RequestCounter.findOneAndUpdate(
         { key },
         { $inc: { count: 1 }, $setOnInsert: { expiresAt } },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
+        { upsert: true, new: true },
       );
     } catch (error) {
       if (error.code !== 11000) throw error;
@@ -211,7 +211,7 @@ module.exports.rateLimit = ({ scope, windowMs, max, skip = () => false }) => asy
 
     const retryAfter = Math.max(1, Math.ceil(((windowNumber + 1) * windowMs - now) / 1000));
     res.set("Retry-After", String(retryAfter));
-    if (req.path.startsWith("/api/")) return res.status(429).json({ error: "Too many requests. Please wait and try again." });
+    if (req.path.startsWith("/api/") || req.accepts("json")) return res.status(429).json({ error: "Too many requests. Please wait and try again." });
     return res.status(429).render("listings/error", { statusCode: 429, message: "Too many requests. Please wait a moment and try again." });
   } catch (error) {
     next(error);

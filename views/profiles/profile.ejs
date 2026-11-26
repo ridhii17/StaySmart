@@ -62,6 +62,17 @@
     </div>
   </section>
 
+  <section class="dashboard-verification" aria-label="Host verification">
+    <div><p class="dashboard-section-eyebrow">TRAVELER TRUST</p><h2>Host verification</h2>
+      <% if (hostVerification?.status === "verified") { %><p>Your host profile is verified. This badge appears beside stays you host.</p>
+      <% } else if (hostVerification?.status === "pending") { %><p>Your verification request is awaiting manual review.</p>
+      <% } else if (hostVerification?.status === "rejected") { %><p>Your request needs more information before it can be approved.</p>
+      <% } else { %><p>Share public hosting details and request a manual review to build traveler confidence.</p><% } %>
+    </div>
+    <% if (hostVerification?.status === "verified") { %><span class="host-verified-badge"><i class="fa-solid fa-circle-check"></i> Verified host</span><% } else if (hostVerification?.status !== "pending") { %><a href="/host/verification" class="dashboard-secondary-button"><%= hostVerification?.status === "rejected" ? "Update request" : "Request verification" %></a><% } %>
+    <% if (canReviewVerifications) { %><a href="/admin/host-verifications" class="dashboard-review-queue-link">Review requests</a><% } %>
+  </section>
+
   <nav class="dashboard-quick-links" aria-label="StaySmart travel tools">
     <a href="/my-trips"><i class="fa-solid fa-suitcase-rolling"></i><span><strong>My Trips</strong><small>Reservations · <%= bookingCount %></small></span><i class="fa-solid fa-arrow-right"></i></a>
     <a href="/wishlist"><i class="fa-regular fa-heart"></i><span><strong>Saved places</strong><small>Shortlist · <%= savedCount %></small></span><i class="fa-solid fa-arrow-right"></i></a>

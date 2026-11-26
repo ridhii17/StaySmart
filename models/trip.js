@@ -24,4 +24,6 @@ const tripSchema = new Schema({
   expenses: [expenseSchema],
 }, { timestamps: true });
 
+tripSchema.index({ owner: 1, updatedAt: -1 });
+
 module.exports = mongoose.model("Trip", tripSchema);

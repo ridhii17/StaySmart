@@ -23,6 +23,7 @@ const userSchema = new Schema({
   },
   role: { type: String, enum: ["guest", "host"], default: "guest" },
   savedListings: [{ type: Schema.Types.ObjectId, ref: "Listing" }],
+  hostVerificationStatus: { type: String, enum: ["not_requested", "pending", "verified", "rejected"], default: "not_requested", index: true },
 });
 
 userSchema.plugin(passportLocalMongoose);

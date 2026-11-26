@@ -96,6 +96,8 @@
   color: inherit;
 }
 
+.stay-card__verified-host{display:inline-flex;align-items:center;gap:6px;width:max-content;margin:2px 0 8px;padding:5px 8px;border:1px solid #cbe7d8;border-radius:999px;background:#eff9f3;color:#176344;font-size:.7rem;font-weight:750}
+
 /* StaySmart explore filters and tools */
 .smart-shortcuts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 20px}
 .smart-shortcuts a{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #dce8e6;border-radius:999px;background:#f7fbfa;color:#087f78;text-decoration:none;font-size:.82rem;font-weight:700;transition:background .16s,border-color .16s,transform .16s}

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing");
-const { isLoggedIn, isOwner, validateListing } = require("../middleware");
+const { isLoggedIn, isOwner, validateListing, rateLimit } = require("../middleware");
 const ListingController = require("../controllers/listings");
 const multer = require("multer");
 const { storage } = require("../cloudConfig");
@@ -24,6 +24,7 @@ router
   .post(
     //Create Route
     isLoggedIn,
+    rateLimit({ scope: "create-listing", windowMs: 24 * 60 * 60 * 1000, max: 20 }),
     listingImages,
     validateListing,
     wrapAsync(ListingController.createListing)

@@ -27,7 +27,7 @@ const upload = multer({ storage });
 router
   .route("/signup")
   .get(userController.renderSignupForm)
-  .post(wrapAsync(userController.signup));
+  .post(rateLimit({ scope: "signup", windowMs: 60 * 60 * 1000, max: 5 }), wrapAsync(userController.signup));
 
 router
   .route("/login")

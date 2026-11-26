@@ -1,6 +1,6 @@
 # StaySmart
 
-StaySmart is a vacation-stay marketplace built with Express, EJS, and MongoDB. Travelers can discover and compare stays, save favorites, leave reviews, plan group trips, and manage reservations. Hosts can publish stays and view reservations.
+StaySmart is a vacation-stay marketplace built with Express, EJS, and MongoDB. Travelers can discover and compare stays, save favorites, leave reviews, plan group trips, and manage reservations. Hosts can publish stays and manage reservations.
 
 ## Requirements
 
@@ -27,9 +27,24 @@ StaySmart is a vacation-stay marketplace built with Express, EJS, and MongoDB. T
    CLOUD_API_KEY=
    CLOUD_API_SECRET=
    GEOAPIFY_KEY=
+
+   # Optional: Razorpay checkout (start with test credentials)
+   RAZORPAY_KEY_ID=
+   RAZORPAY_KEY_SECRET=
+   RAZORPAY_WEBHOOK_SECRET=
+
+   # Optional: AI Smart Picks (only called after a traveler opts in)
+   OPENAI_API_KEY=
+   OPENAI_MODEL=gpt-6-luna
+
+   # Optional: exact signed-in account email allowed to approve hosts
+   VERIFICATION_ADMIN_EMAIL=
+
+   # Set to 1 only behind one trusted reverse proxy
+   TRUST_PROXY=0
    ```
 
-   For MongoDB Atlas, use your Atlas connection string for `ATLAS_URL` instead. Cloudinary and Geoapify settings are optional for basic browsing, but their related upload and nearby-place features need valid credentials.
+   For MongoDB Atlas, use your Atlas connection string for `ATLAS_URL` instead. Cloudinary and Geoapify settings are optional for basic browsing; their related upload and nearby-place features require valid credentials. Razorpay and OpenAI are optional integrations described below.
 
 3. Add the sample stays and demo content:
 
@@ -69,7 +84,10 @@ New demo accounts use `StaySmartDemo2026!` by default. Set `DEMO_SEED_PASSWORD` 
 - Guest reviews and ratings on stays
 - Smart stay recommendations and a student-budget search
 - Saved-place wishlist and side-by-side stay comparison
-- Demo reservations with availability checks, cost breakdowns, and cancellation
+- Reservations with availability refresh, itemized pricing, payment status, and cancellation
+- Optional Razorpay checkout with server-side payment verification and cancellation refunds
+- Optional AI-ranked Smart Picks with explicit traveler opt-in and a preference-based fallback
+- Manual host verification requests and verified-host badges
 - Group trip plans with selected stays, shared expenses, and suggested settlements
 - StaySmart help chatbot for common travel and app questions
 - Profile dashboards for guest activity and host listings
@@ -86,26 +104,37 @@ New demo accounts use `StaySmartDemo2026!` by default. Set `DEMO_SEED_PASSWORD` 
 | My reservations | `/my-trips` |
 | Group trip planner | `/trips` |
 | Host reservations | `/host/bookings` |
+| Request host verification | `/host/verification` |
+| Review host verification (configured reviewer only) | `/admin/host-verifications` |
 | Profile | `/profile` |
 
-## Limitations and future improvements
+## Implemented improvements and provider setup
 
-StaySmart is currently a demonstration project and is not ready to operate as a commercial booking platform.
+The code includes these improvements. Payment and AI are optional integrations: provider credentials activate them, and the app continues to work in clearly labelled demo mode without credentials.
 
-### Current limitations
+### Online payments
 
-- Reservations demonstrate booking, pricing, and conflict checks, but do not process real online payments.
-- Availability is checked when a reservation is made; changes are not broadcast to users in real time.
-- Personalized stay recommendations use preference scoring and do not use an AI model yet.
-- Image uploads depend on Cloudinary, and nearby-place discovery depends on Geoapify. These features need valid service credentials.
-- The app includes sample stays, reviews, accounts, reservations, and trips. Keep seeded demo data in a development database.
-- Sample stay and profile photos use remote image URLs and need an internet connection to load.
+- With `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` configured, checkout creates an order on the server, verifies the checkout signature and payment amount, and confirms the reservation after payment capture.
+- Cancelling a paid reservation requests a full refund. Payment and refund states are shown in My Trips and reconciled from signed webhooks.
+- Without Razorpay keys, checkout is clearly marked as a demo and does not collect money.
+- Keep the keys private and start with Razorpay test credentials. Configure a Razorpay webhook to `https://YOUR-DOMAIN/api/payments/razorpay/webhook`, set its secret as `RAZORPAY_WEBHOOK_SECRET`, and subscribe to `payment.captured` and `refund.processed`. Live payments require an activated Razorpay merchant account.
 
-### Planned improvements
+See the [Razorpay web integration guide](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps) and [refund API](https://hdfcbank-collectnow-docs.razorpay.com/api/refunds/create-normal/) for provider setup details.
 
-- Integrate a secure payment gateway and add payment confirmation and refund handling.
-- Improve personalized recommendations with an AI-powered ranking service.
-- Expand availability handling with real-time updates across search, booking, and host dashboards.
-- Add a host verification process and clearly display verified profiles.
-- Strengthen security, privacy controls, monitoring, and deployment configuration before a public launch.
-- Improve scalability and continue refining the experience across desktop and mobile screens.
+### AI recommendations
+
+- Add `OPENAI_API_KEY` to enable the opt-in AI option on Smart Picks. `OPENAI_MODEL` is optional; the configured default is `gpt-6-luna`.
+- AI is called only when the traveler selects “Use AI recommendations.” The request sends search filters, anonymous stay preferences, and public stay details; it does not send the user's name or email. The app validates returned stay IDs and falls back to its local ranking when the provider is unavailable.
+- OpenAI API use may incur charges. Review API access, project limits, and pricing before enabling it. Requests use the [Responses API](https://platform.openai.com/docs/api-reference/responses/create) with structured output and response storage disabled.
+
+### Availability and host verification
+
+- The booking page refreshes availability every 15 seconds while visible, then the server checks again before checkout and reservation creation. This is near-real-time polling; open pages do not receive push updates.
+- Hosts can request manual profile verification at `/host/verification`. Set `VERIFICATION_ADMIN_EMAIL` to the exact email of the reviewer account; that signed-in account can review requests at `/admin/host-verifications`. Approval adds a verified badge. This is manual review, not automated identity or government-ID verification.
+
+### Security, deployment, and remaining service requirements
+
+- The app sets baseline security headers, uses HTTP-only SameSite cookies (Secure in production), applies shared MongoDB-backed request limits, and defines indexes for common listing, review, booking, and trip queries. Set `TRUST_PROXY=1` only when one trusted reverse proxy sits in front of the app so secure cookies and client IP handling work correctly.
+- Use HTTPS in production, a long random `SECRET`, restricted production database credentials, regular database backups, and monitoring. Keep seeded demo accounts and sample records in development databases.
+- Image uploads require Cloudinary credentials; nearby-place discovery requires a Geoapify key. Sample image URLs need internet access.
+- Before taking real customer bookings, configure provider accounts and webhooks, run payment and refund scenarios with test credentials, review deployment and privacy settings, and arrange operational support. The code provides the integrations; production readiness still depends on provider accounts and deployment configuration.

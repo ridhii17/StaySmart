@@ -17,9 +17,9 @@ const paymentIntentSchema = new Schema({
   providerOrderId: { type: String, unique: true, sparse: true },
   paymentId: String,
   status: { type: String, enum: ["pending", "paid", "failed", "refund_pending", "refunded"], default: "pending", index: true },
-  expiresAt: { type: Date, expires: 0 },
+  // This is a checkout deadline, not a retention deadline. Keep expired
+  // intents available for payment reconciliation and refund support.
+  expiresAt: Date,
 }, { timestamps: true });
-
-paymentIntentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true });
 
 module.exports = mongoose.model("PaymentIntent", paymentIntentSchema);

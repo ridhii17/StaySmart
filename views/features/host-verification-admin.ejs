@@ -1,0 +1,16 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/features.css" />
+<main class="smart-page">
+  <a class="smart-back" href="/profile">← Back to profile</a>
+  <header class="smart-hero"><div><p class="smart-eyebrow">ADMIN REVIEW</p><h1>Host verification requests</h1><p>Review public business evidence and record an approval or decline with a short note.</p></div></header>
+  <% if (requests.length) { %>
+    <div class="verification-queue"><% for (const request of requests) { %>
+      <article class="smart-panel verification-request">
+        <div class="verification-request__host"><img src="<%= request.user?.image?.url || '/Icon/DefaultImg.png' %>" alt=""/><div><p class="smart-eyebrow"><%= request.businessName %></p><h2><%= request.user?.fName || request.user?.username || "Host" %> <%= request.user?.lName || "" %></h2><p><%= request.user?.email || "Account unavailable" %></p></div></div>
+        <p><%= request.verificationDetails %></p>
+        <% if (request.evidenceUrl) { %><p><a href="<%= request.evidenceUrl %>" target="_blank" rel="noopener noreferrer">Open public evidence link</a></p><% } %>
+        <form class="smart-form" action="/admin/host-verifications/<%= request._id %>" method="POST"><label>Review note<textarea name="reviewerNote" rows="2" maxlength="500" placeholder="Optional note for the host"></textarea></label><div class="verification-actions"><button class="smart-button" name="decision" value="approve">Approve verification</button><button class="smart-button smart-button--outline" name="decision" value="reject">Decline request</button></div></form>
+      </article>
+    <% } %></div>
+  <% } else { %><div class="smart-empty"><h2>No requests to review</h2><p>New host verification requests will appear here.</p></div><% } %>
+</main>

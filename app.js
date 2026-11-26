@@ -24,8 +24,10 @@ const profileRouter = require("./routes/profile.js");
 const chatbotRouter = require("./routes/chatbot.js");
 const featuresRouter = require("./routes/features.js");
 const paymentsRouter = require("./routes/payments.js");
+const verificationRouter = require("./routes/verification.js");
 const paymentController = require("./controllers/payments");
 const wrapAsync = require("./utils/wrapAsync");
+const { rateLimit } = require("./middleware");
 
 app.disable("x-powered-by");
 if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
@@ -38,11 +40,16 @@ main()
     console.log("Connected to MongoDB");
   })
   .catch((err) => {
-    console.log(err);
+    console.error("Unable to connect to MongoDB:", err.message);
+    process.exit(1);
   });
 
 async function main() {
   await mongoose.connect(dbURL);
+  const port = Number(process.env.PORT) || 8080;
+  app.listen(port, () => {
+    console.log(`StaySmart is running on port ${port}`);
+  });
 }
 //view engine
 app.engine("ejs", ejsMate);
@@ -52,6 +59,7 @@ app.set("views", path.join(__dirname, "views"));
 // The webhook needs its original bytes so the Razorpay signature can be verified.
 app.post(
   "/api/payments/razorpay/webhook",
+  rateLimit({ scope: "payment-webhook", windowMs: 60 * 1000, max: 300 }),
   express.raw({ type: "application/json", limit: "64kb" }),
   wrapAsync(paymentController.webhook),
 );
@@ -128,6 +136,7 @@ app.use((req, res, next) => {
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", paymentsRouter);
+app.use("/", verificationRouter);
 app.use("/", featuresRouter);
 app.use("/", userRouter);
 app.use("/profile", profileRouter);
@@ -140,11 +149,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong" } = err;
-  if (req.path.startsWith("/api/")) return res.status(statusCode).json({ error: message });
+  if (req.path.startsWith("/api/") || req.accepts("json")) return res.status(statusCode).json({ error: message });
   // res.status(statusCode).send(message);
   res.render("listings/error", { statusCode, message });
-});
-
-app.listen(8080, () => {
-  console.log("Server is running on port 8080");
 });

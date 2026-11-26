@@ -6,12 +6,19 @@
     <label>Destination<input name="destination" value="<%= preferences.destination %>" placeholder="City or region" /></label>
     <label>Max per night (₹)<input type="number" min="0" name="budget" value="<%= preferences.budget || '' %>" placeholder="Any budget" /></label>
     <label>Guests<input type="number" min="1" max="30" name="guests" value="<%= preferences.guests %>" /></label>
+    <% if (aiConfigured) { %>
+      <label class="ai-opt-in"><input type="checkbox" name="useAI" value="on" <%= aiUsed || aiFailed ? "checked" : "" %> /> Use AI recommendations</label>
+      <small class="ai-privacy-note">When selected, this request sends your filters, anonymous saved-stay preferences, and public stay details to OpenAI. No account name or email is sent.</small>
+    <% } else { %>
+      <p class="ai-privacy-note">AI recommendations can be enabled by adding an OpenAI API key to your local environment.</p>
+    <% } %>
     <button class="smart-button" type="submit">Update matches</button>
   </form>
+  <% if (aiFailed) { %><p class="ai-fallback-note" role="status">AI recommendations could not be reached, so the page is showing its regular preference-based picks.</p><% } %>
   <% const sections = [["Best Overall", "Strongest match across budget, guest fit, amenities and guest feedback.", bestOverall], ["Best Budget", "Lower nightly rates, ranked with guest fit in mind.", bestBudget], ["Best Location", "Places closest to your destination preference.", bestLocation]]; %>
   <% for (const [heading, description, results] of sections) { %>
-    <section class="smart-section"><div class="smart-section-heading"><div><p class="smart-eyebrow">SMART PICKS</p><h2><%= heading %></h2><p><%= description %></p></div></div>
-      <% if (results.length) { %><div class="smart-grid"><% for (const result of results) { %><%- include("stay-card.ejs", { listing: result.listing, score: result.score, reasons: result.reasons, trustScore: result.trustScore, budgetLimit: preferences.budget }) %><% } %></div><% } else { %><p class="smart-empty">No places yet. Add a place to see recommendations.</p><% } %>
+    <section class="smart-section"><div class="smart-section-heading"><div><p class="smart-eyebrow"><%= heading === "Best Overall" && aiUsed ? "AI PERSONALIZED PICKS" : "SMART PICKS" %></p><h2><%= heading %></h2><p><%= description %></p></div></div>
+      <% if (results.length) { %><div class="smart-grid"><% for (const result of results) { %><%- include("stay-card.ejs", { listing: result.listing, score: result.score, reasons: result.reasons, aiReason: result.aiReason, trustScore: result.trustScore, budgetLimit: preferences.budget }) %><% } %></div><% } else { %><p class="smart-empty">No places yet. Add a place to see recommendations.</p><% } %>
     </section>
   <% } %>
 </main>

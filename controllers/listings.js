@@ -59,7 +59,7 @@ module.exports.index = async (req, res) => {
     query._id = { $nin: conflicts };
   }
   const count = await Listing.countDocuments(query);
-  const listings = await Listing.find(query).populate("owner", "username email fName image").populate("reviews", "rating")
+  const listings = await Listing.find(query).populate("owner", "username email fName image hostVerificationStatus").populate("reviews", "rating")
     .sort({ _id: -1 }).skip((parsedPage - 1) * pageSize).limit(pageSize);
   for (const listing of listings) {
     listing.trustScore = getTrustScore(listing);
@@ -221,7 +221,7 @@ module.exports.removeGalleryImage = async (req, res) => {
 //-------ADD-------
 module.exports.filter = async (req, res, next) => {
   let { id } = req.params;
-  let listings = await Listing.find({ category: { $all: [id] } }).populate("reviews", "rating").populate("owner", "username email fName image");
+  let listings = await Listing.find({ category: { $all: [id] } }).populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
   if (listings.length != 0) {
     decorateListings(listings, req.user);
     res.locals.totalCount = listings.length;
@@ -260,7 +260,7 @@ module.exports.search = async (req, res) => {
   const searchPattern = escapeRegex(element);
   let listings = await Listing.find({
     title: { $regex: searchPattern, $options: "i" },
-  }).populate("reviews", "rating").populate("owner", "username email fName image");
+  }).populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
   if (listings.length != 0) {
     decorateListings(listings, req.user);
     res.locals.totalCount = listings.length;
@@ -273,7 +273,7 @@ module.exports.search = async (req, res) => {
       category: { $regex: searchPattern, $options: "i" },
     })
       .sort({ _id: -1 })
-      .populate("reviews", "rating").populate("owner", "username email fName image");
+      .populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
     if (listings.length != 0) {
       decorateListings(listings, req.user);
       res.locals.totalCount = listings.length;
@@ -287,7 +287,7 @@ module.exports.search = async (req, res) => {
       country: { $regex: searchPattern, $options: "i" },
     })
       .sort({ _id: -1 })
-      .populate("reviews", "rating").populate("owner", "username email fName image");
+      .populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
     if (listings.length != 0) {
       decorateListings(listings, req.user);
       res.locals.totalCount = listings.length;
@@ -301,7 +301,7 @@ module.exports.search = async (req, res) => {
       location: { $regex: searchPattern, $options: "i" },
     })
       .sort({ _id: -1 })
-      .populate("reviews", "rating").populate("owner", "username email fName image");
+      .populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
     if (listings.length != 0) {
       decorateListings(listings, req.user);
       res.locals.totalCount = listings.length;
@@ -316,7 +316,7 @@ module.exports.search = async (req, res) => {
   if (listings.length == 0 && intDec) {
     listings = await Listing.find({ price: { $lte: element } })
       .sort({ price: 1 })
-      .populate("reviews", "rating").populate("owner", "username email fName image");
+      .populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus");
     if (listings.length != 0) {
       decorateListings(listings, req.user);
       res.locals.totalCount = listings.length;

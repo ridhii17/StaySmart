@@ -1,5 +1,31 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
-<main class="smart-page"><header class="smart-hero"><div><p class="smart-eyebrow">YOUR RESERVATIONS</p><h1>My Trips</h1><p>Review upcoming and previous demo reservations.</p></div><a class="smart-button" href="/trips">Open group planner</a></header>
-  <% if (bookings.length) { %><div class="smart-booking-list"><% for (const booking of bookings) { %><article class="smart-booking"><img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>"/><div class="smart-booking__body"><p class="smart-eyebrow"><%= booking.status %></p><h2><%= booking.listing?.title || "Place unavailable" %></h2><p><%= booking.listing ? [booking.listing.location, booking.listing.country].filter(Boolean).join(", ") : "" %></p><p><%= booking.checkIn.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> – <%= booking.checkOut.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> · <%= booking.guests %> guests</p><strong>₹<%= booking.total.toLocaleString("en-IN") %></strong><details class="booking-receipt"><summary>View price breakdown</summary><p>₹<%= Number(booking.nightlyRate).toLocaleString("en-IN") %> × <%= booking.nights %> nights: ₹<%= Number(booking.subtotal).toLocaleString("en-IN") %></p><p>Service fee: ₹<%= Number(booking.serviceFee).toLocaleString("en-IN") %> · Cleaning: ₹<%= Number(booking.cleaningFee).toLocaleString("en-IN") %></p></details></div><% if (booking.status === "confirmed" && booking.checkIn > new Date()) { %><form method="POST" action="/bookings/<%= booking._id %>/cancel"><button class="smart-button smart-button--outline">Cancel reservation</button></form><% } %></article><% } %></div><% } else { %><div class="smart-empty"><h2>Your next trip starts here</h2><p>Choose a place, select your dates, and review the full cost before confirming.</p><a class="smart-button" href="/listings">Explore places</a></div><% } %>
+<main class="smart-page">
+  <header class="smart-hero">
+    <div><p class="smart-eyebrow">YOUR RESERVATIONS</p><h1>My Trips</h1><p>Review booking dates, payment status, and cancellation options.</p></div>
+    <a class="smart-button" href="/trips">Open group planner</a>
+  </header>
+  <% if (bookings.length) { %>
+    <div class="smart-booking-list">
+      <% for (const booking of bookings) { %>
+        <% const paymentLabel = booking.paymentStatus === "paid" ? "Paid securely" : booking.paymentStatus === "refund_pending" ? "Refund processing" : booking.paymentStatus === "refunded" ? "Refunded" : "Demo reservation"; %>
+        <article class="smart-booking">
+          <img src="<%= booking.listing?.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= booking.listing?.title || 'Place' %>"/>
+          <div class="smart-booking__body">
+            <p class="smart-eyebrow"><%= booking.status %> · <%= paymentLabel %></p>
+            <h2><%= booking.listing?.title || "Place unavailable" %></h2>
+            <p><%= booking.listing ? [booking.listing.location, booking.listing.country].filter(Boolean).join(", ") : "" %></p>
+            <p><%= booking.checkIn.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> – <%= booking.checkOut.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %> · <%= booking.guests %> guests</p>
+            <strong>₹<%= booking.total.toLocaleString("en-IN") %></strong>
+            <details class="booking-receipt"><summary>View price breakdown</summary><p>₹<%= Number(booking.nightlyRate).toLocaleString("en-IN") %> × <%= booking.nights %> nights: ₹<%= Number(booking.subtotal).toLocaleString("en-IN") %></p><p>Service fee: ₹<%= Number(booking.serviceFee).toLocaleString("en-IN") %> · Cleaning: ₹<%= Number(booking.cleaningFee).toLocaleString("en-IN") %></p></details>
+          </div>
+          <% if (booking.status === "confirmed" && booking.checkIn > new Date()) { %>
+            <form method="POST" action="/bookings/<%= booking._id %>/cancel"><button class="smart-button smart-button--outline">Cancel reservation</button></form>
+          <% } %>
+        </article>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="smart-empty"><h2>Your next trip starts here</h2><p>Choose a place, select your dates, and review the full cost before confirming.</p><a class="smart-button" href="/listings">Explore places</a></div>
+  <% } %>
 </main>

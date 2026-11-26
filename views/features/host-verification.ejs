@@ -1,0 +1,24 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/features.css" />
+<main class="smart-page smart-narrow">
+  <a class="smart-back" href="/profile">← Back to profile</a>
+  <header class="smart-hero"><div><p class="smart-eyebrow">HOST PROFILE</p><h1>Host verification</h1><p>Share public business details for a manual review. StaySmart never asks for government ID or payment-card details here.</p></div></header>
+
+  <% if (verification?.status === "verified") { %>
+    <section class="smart-panel verification-status verification-status--verified"><h2><i class="fa-solid fa-circle-check"></i> Host profile verified</h2><p>Your profile has been reviewed by a StaySmart administrator. Verified host badges now appear with your stays.</p></section>
+  <% } else if (verification?.status === "pending") { %>
+    <section class="smart-panel verification-status verification-status--pending"><h2><i class="fa-regular fa-clock"></i> Request under review</h2><p>Submitted <%= verification.createdAt.toLocaleDateString("en-IN", {day:"numeric",month:"short",year:"numeric"}) %>. We’ll update your profile after review.</p></section>
+  <% } else { %>
+    <% if (verification?.status === "rejected" && verification.reviewerNote) { %><p class="verification-review-note"><strong>Review note:</strong> <%= verification.reviewerNote %></p><% } %>
+    <form class="smart-panel smart-form" action="/host/verification" method="POST">
+      <h2>Submit public host details</h2>
+      <label>Host or business name<input name="businessName" maxlength="120" value="<%= verification?.businessName || `${currentUser.fName || ''} ${currentUser.lName || ''}`.trim() %>" required /></label>
+      <label>Public business or professional profile link <small>Optional · HTTPS links only</small><input type="url" name="evidenceUrl" maxlength="500" placeholder="https://example.com/host-profile" value="<%= verification?.evidenceUrl || '' %>" /></label>
+      <label>How can a reviewer verify your hosting activity?<textarea name="verificationDetails" rows="5" maxlength="1200" minlength="30" placeholder="Describe your hosting business and provide public details a reviewer can confirm." required><%= verification?.verificationDetails || '' %></textarea></label>
+      <p class="smart-muted">Do not include government identification numbers, passwords, or financial information. A StaySmart administrator reviews this request manually.</p>
+      <button class="smart-button" type="submit">Submit for review</button>
+    </form>
+  <% } %>
+
+  <% if (canReviewVerifications) { %><p class="verification-admin-link"><a href="/admin/host-verifications">Review host requests</a></p><% } %>
+</main>

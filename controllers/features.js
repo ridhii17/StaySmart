@@ -6,6 +6,7 @@ const Trip = require("../models/trip");
 const razorpay = require("../utils/razorpay");
 const { withReservationLock, availabilityFilter, isAvailable } = require("../utils/reservations");
 const paymentsController = require("./payments");
+const aiRecommendations = require("../utils/ai-recommendations");
 const { calculatePrice, getTrustScore, scoreListing } = require("../utils/stay-smart");
 
 const validId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -23,6 +24,27 @@ function bookingUrl(listingId, checkIn, checkOut, guests) {
   return `/bookings/new/${listingId}?${params}`;
 }
 
+async function getTravelerProfile(user) {
+  if (!user) return null;
+  const savedIds = (user.savedListings || []).slice(0, 25);
+  const [saved, pastBookings] = await Promise.all([
+    savedIds.length ? Listing.find({ _id: { $in: savedIds } }).select("category amenities price") : [],
+    Booking.find({ guest: user._id, status: "confirmed" }).sort({ createdAt: -1 }).limit(8).populate("listing", "category amenities price"),
+  ]);
+  const stays = [...saved, ...pastBookings.map((booking) => booking.listing).filter(Boolean)];
+  const counts = (field) => {
+    const ranking = new Map();
+    stays.flatMap((stay) => stay[field] || []).forEach((value) => ranking.set(value, (ranking.get(value) || 0) + 1));
+    return [...ranking.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([value]) => value);
+  };
+  const prices = stays.map((stay) => Number(stay.price)).filter((price) => Number.isFinite(price) && price > 0);
+  return {
+    favoriteCategories: counts("category"),
+    favoriteAmenities: counts("amenities"),
+    typicalNightlyPrice: prices.length ? Math.round(prices.reduce((total, price) => total + price, 0) / prices.length) : null,
+  };
+}
+
 module.exports.smartPicks = async (req, res) => {
   const preferences = {
     destination: (typeof req.query.destination === "string" ? req.query.destination : "").trim().slice(0, 80),
@@ -30,19 +52,62 @@ module.exports.smartPicks = async (req, res) => {
     guests: Math.max(1, Math.min(30, Number(req.query.guests) || 1)),
     amenities: (Array.isArray(req.query.amenities) ? req.query.amenities : typeof req.query.amenities === "string" ? [req.query.amenities] : []).filter((item) => typeof item === "string").slice(0, 20),
   };
-  const listings = await Listing.find({}).populate("owner", "username email fName image").populate("reviews", "rating");
+  const listings = await Listing.find({}).populate("owner", "username email fName image hostVerificationStatus").populate("reviews", "rating");
   const ranked = listings.map((listing) => ({ listing, ...scoreListing(listing, preferences), trustScore: getTrustScore(listing), budgetLimit: preferences.budget }))
     .sort((a, b) => b.score - a.score || a.listing.price - b.listing.price);
   for (const result of ranked) result.listing.isSaved = Boolean(req.user?.savedListings?.some((id) => id.equals(result.listing._id)));
+  let aiFailed = false;
+  let aiUsed = false;
+  let bestOverall = ranked.slice(0, 4);
+  if (req.query.useAI === "on" && aiRecommendations.isConfigured() && ranked.length) {
+    try {
+      const travelerProfile = await getTravelerProfile(req.user);
+      const candidates = ranked.slice(0, 30).map(({ listing, score }) => {
+        const ratings = (listing.reviews || []).map((review) => Number(review.rating)).filter(Number.isFinite);
+        return {
+          id: String(listing._id),
+          title: listing.title,
+          location: [listing.location, listing.country].filter(Boolean).join(", "),
+          nightlyPrice: Number(listing.price || 0),
+          capacity: Number(listing.capacity || 2),
+          propertyType: listing.propertyType || "Home",
+          categories: listing.category || [],
+          amenities: listing.amenities || [],
+          guestRating: ratings.length ? Number((ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1)) : null,
+          matchScore: score,
+        };
+      });
+      const recommendations = await aiRecommendations.rankStays({ preferences, travelerProfile, candidates });
+      const rankedById = new Map(ranked.map((item) => [String(item.listing._id), item]));
+      const aiResults = recommendations.map(({ id, reason }) => ({ ...rankedById.get(id), aiReason: reason })).filter((item) => item.listing);
+      if (aiResults.length) {
+        bestOverall = aiResults;
+        aiUsed = true;
+      } else {
+        aiFailed = true;
+      }
+    } catch (error) {
+      aiFailed = true;
+      console.error("AI stay recommendations unavailable:", error.response?.status || error.code || "request failed");
+    }
+  }
   const budgetRanked = [...ranked].sort((a, b) => a.listing.price - b.listing.price || b.score - a.score);
   const locationRanked = preferences.destination
     ? [...ranked].sort((a, b) => Number(`${b.listing.location} ${b.listing.country}`.toLowerCase().includes(preferences.destination.toLowerCase())) - Number(`${a.listing.location} ${a.listing.country}`.toLowerCase().includes(preferences.destination.toLowerCase())) || b.score - a.score)
     : ranked;
-  res.render("features/smart-picks", { preferences, bestOverall: ranked.slice(0, 4), bestBudget: budgetRanked.slice(0, 4), bestLocation: locationRanked.slice(0, 4) });
+  res.render("features/smart-picks", {
+    preferences,
+    bestOverall,
+    bestBudget: budgetRanked.slice(0, 4),
+    bestLocation: locationRanked.slice(0, 4),
+    aiConfigured: aiRecommendations.isConfigured(),
+    aiUsed,
+    aiFailed,
+  });
 };
 
 module.exports.wishlist = async (req, res) => {
-  const user = await req.user.populate({ path: "savedListings", populate: [{ path: "owner", select: "username email fName image" }, { path: "reviews", select: "rating" }] });
+  const user = await req.user.populate({ path: "savedListings", populate: [{ path: "owner", select: "username email fName image hostVerificationStatus" }, { path: "reviews", select: "rating" }] });
   const listings = (user.savedListings || []).filter(Boolean).map((listing) => ({ listing, trustScore: getTrustScore(listing) }));
   for (const item of listings) item.listing.isSaved = true;
   res.render("features/wishlist", { listings });
@@ -60,7 +125,7 @@ module.exports.toggleWishlist = async (req, res) => {
 
 module.exports.compare = async (req, res) => {
   const ids = [...new Set(String(req.query.ids || "").split(",").filter(validId))].slice(0, 4);
-  const listings = ids.length ? await Listing.find({ _id: { $in: ids } }).populate("owner", "username email fName image").populate("reviews", "rating") : [];
+  const listings = ids.length ? await Listing.find({ _id: { $in: ids } }).populate("owner", "username email fName image hostVerificationStatus").populate("reviews", "rating") : [];
   const comparison = listings.map((listing) => ({ listing, trustScore: getTrustScore(listing) }));
   res.render("features/compare", { comparisons: comparison });
 };
@@ -71,7 +136,7 @@ module.exports.students = async (req, res) => {
   const selectedAmenities = (Array.isArray(req.query.amenities) ? req.query.amenities : typeof req.query.amenities === "string" ? [req.query.amenities] : []).filter((item) => studentAmenities.includes(item));
   const filter = { price: { $lte: maxPrice } };
   if (selectedAmenities.length) filter.amenities = { $all: selectedAmenities };
-  const listings = await Listing.find(filter).populate("owner", "username email fName image").populate("reviews", "rating").sort({ price: 1 }).limit(24);
+  const listings = await Listing.find(filter).populate("owner", "username email fName image hostVerificationStatus").populate("reviews", "rating").sort({ price: 1 }).limit(24);
   const results = listings.map((listing) => ({ listing, trustScore: getTrustScore(listing) }));
   for (const item of results) item.listing.isSaved = Boolean(req.user?.savedListings?.some((id) => id.equals(item.listing._id)));
   res.render("features/students", { listings: results, maxPrice, studentAmenities, selectedAmenities });

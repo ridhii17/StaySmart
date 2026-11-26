@@ -1,4 +1,5 @@
 const Listing = require("../models/listing");
+const razorpay = require("../utils/razorpay");
 const { scoreListing, getTrustScore } = require("../utils/stay-smart");
 
 function generalReply(text) {
@@ -7,7 +8,9 @@ function generalReply(text) {
   if (/host|publish|add my place|share my place|create a place|list my place/.test(text)) return "Choose “Become a host” to add your place. Add a cover photo, gallery images, guest capacity, amenities, location and nightly price. You can manage reservations from Host bookings.";
   if (/edit|update|change.*photo|replace.*photo/.test(text)) return "Open Profile, choose a place you manage, then Edit place. You can update the details, amenities, capacity and photos.";
   if (/photo|image|picture|upload/.test(text)) return "Place pages support a cover photo and a gallery. Use a clear cover shot, then add extra views in the gallery field when you create or edit a place.";
-  if (/book|booking|reservation|reserve|payment|checkout|cancel/.test(text)) return "Open a place and choose dates to see availability and an itemized total. Checkout is simulated for this project and does not collect a payment. Upcoming reservations can be cancelled from My Trips.";
+  if (/book|booking|reservation|reserve|payment|checkout|cancel/.test(text)) return razorpay.isConfigured()
+    ? "Open a place and choose dates to see availability and an itemized total. Checkout uses Razorpay and confirms a reservation only after the server verifies the payment. Upcoming reservations can be cancelled from My Trips; eligible cancellations request a refund."
+    : "Open a place and choose dates to see availability and an itemized total. This environment is in demo checkout mode and does not collect a payment. Add Razorpay test keys to enable secure payment checkout. Upcoming demo reservations can be cancelled from My Trips.";
   if (/trip|group|split|expense|budget/.test(text)) return "Use Group planner to set your destination, traveler count and total budget. Add stays to compare nightly and per-person estimates, then record shared expenses to see each member’s balance.";
   if (/price|cost|rate|nightly|₹|rupee/.test(text)) return "Tell me a destination or a maximum nightly budget and I can find matching places. The reservation checkout shows nightly cost, service fee, cleaning fee, total and per-person share.";
   if (/compare|wishlist|favourite|favorite|save/.test(text)) return "Save places with the heart button. On Explore, select up to four places and choose Compare to see price, rating, amenities, guest capacity and trust score side by side.";
@@ -34,7 +37,7 @@ module.exports.reply = async (req, res) => {
   const hasSearchIntent = /recommend|find|show me|looking for|suggest|need a|under\s+₹?|below\s+|within\s+my\s+budget|cheap|affordable|(?:stay|place|room|home|apartment|cabin)s?\s+(?:in|near|around)|(?:in|near|around)\s+[a-z]|what.*(?:stay|place)/.test(text);
   if (!hasSearchIntent) return res.json({ reply: generalReply(text) });
 
-  const listings = await Listing.find(query).populate("reviews", "rating").populate("owner", "username email fName image").limit(200);
+  const listings = await Listing.find(query).populate("reviews", "rating").populate("owner", "username email fName image hostVerificationStatus").limit(200);
   if (!listings.length) {
     return res.json({ reply: budget ? `I couldn’t find a current place at or below ₹${budget.toLocaleString("en-IN")} per night. Try a higher budget or explore another destination.` : "There aren’t any published places to match that request yet. Try Explore or check back after a host adds a place." });
   }

@@ -67,5 +67,10 @@ listingSchema.pre(
 );
 
 
+listingSchema.index({ owner: 1, _id: -1 });
+listingSchema.index({ category: 1 });
+listingSchema.index({ amenities: 1, price: 1 });
+listingSchema.index({ propertyType: 1, price: 1 });
+
 const Listing = mongoose.model("Listing", listingSchema);
 module.exports = Listing;
