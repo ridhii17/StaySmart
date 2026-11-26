@@ -347,6 +347,76 @@ const sampleListings = [
     location: "Costa Rica",
     country: "Costa Rica",
   },
+  {
+    title: "Heritage Haveli in Jaipur",
+    description:
+      "Stay in a restored haveli with hand-painted details, a quiet courtyard, and easy access to Jaipur's historic sights.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+    },
+    price: 8500,
+    location: "Jaipur, Rajasthan",
+    country: "India",
+    category: ["Iconic Cities", "Luxe", "Trending"],
+    geometry: { type: "Point", coordinates: [75.7873, 26.9124] },
+  },
+  {
+    title: "Backwater House in Alleppey",
+    description:
+      "Wake up beside Kerala's calm backwaters in a spacious home with a shaded veranda and views of passing houseboats.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+    },
+    price: 7200,
+    location: "Alleppey, Kerala",
+    country: "India",
+    category: ["Lakefront", "Amazing Views", "Countryside"],
+    geometry: { type: "Point", coordinates: [76.3388, 9.4981] },
+  },
+  {
+    title: "Tea Estate Cottage in Munnar",
+    description:
+      "Unwind in a snug hillside cottage surrounded by tea gardens, misty mornings, and walking trails in the Western Ghats.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80",
+    },
+    price: 5400,
+    location: "Munnar, Kerala",
+    country: "India",
+    category: ["Cabins", "Countryside", "Amazing Views"],
+    geometry: { type: "Point", coordinates: [77.0595, 10.0889] },
+  },
+  {
+    title: "Tropical Pool Villa in Goa",
+    description:
+      "Enjoy a private pool, open-air dining, and a relaxed tropical garden just a short drive from Goa's beaches.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80",
+    },
+    price: 9800,
+    location: "Assagao, Goa",
+    country: "India",
+    category: ["Tropical", "Amazing Pools", "Luxe"],
+    geometry: { type: "Point", coordinates: [73.8278, 15.2993] },
+  },
+  {
+    title: "Riverside Cabin in Rishikesh",
+    description:
+      "A peaceful cabin near the Ganges with mountain views, a private deck, and quick access to riverside walks.",
+    image: {
+      filename: "listingimage",
+      url: "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1200&q=80",
+    },
+    price: 4600,
+    location: "Rishikesh, Uttarakhand",
+    country: "India",
+    category: ["Cabins", "Amazing Views", "Trending"],
+    geometry: { type: "Point", coordinates: [78.2676, 30.0869] },
+  },
 ];
 
 module.exports = sampleListings;

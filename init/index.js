@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 const initData = require("./data.js");
 const Listing = require("../models/listing");
 
-const MONGO_URL = "mongodb://localhost:27017/StaySphere";
+const MONGO_URL = process.env.ATLAS_URL || "mongodb://localhost:27017/StaySphere";
 
 console.log("Seeding script started...");
 
@@ -11,16 +12,17 @@ async function main() {
     await mongoose.connect(MONGO_URL);
     console.log("Connected to MongoDB");
 
-    await Listing.deleteMany({});
+    const result = await Listing.bulkWrite(
+      initData.map((listing) => ({
+        updateOne: {
+          filter: { title: listing.title },
+          update: { $setOnInsert: listing },
+          upsert: true,
+        },
+      })),
+    );
 
-    initData.data = initData.map((obj) => ({
-      ...obj,
-      owner: "6962670729486adc51a3b7fa",
-    }));
-
-    await Listing.insertMany(initData.data);
-
-    console.log("Database initialized with sample data");
+    console.log(`Sample listings added: ${result.upsertedCount}`);
   } catch (err) {
     console.log("Error:", err);
   } finally {
