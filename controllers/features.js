@@ -1,9 +1,11 @@
 const axios = require("axios");
 const mongoose = require("mongoose");
-const { randomUUID } = require("crypto");
 const Listing = require("../models/listing");
 const Booking = require("../models/booking");
 const Trip = require("../models/trip");
+const razorpay = require("../utils/razorpay");
+const { withReservationLock, availabilityFilter, isAvailable } = require("../utils/reservations");
+const paymentsController = require("./payments");
 const { calculatePrice, getTrustScore, scoreListing } = require("../utils/stay-smart");
 
 const validId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -19,22 +21,6 @@ function parseDateOnly(value) {
 function bookingUrl(listingId, checkIn, checkOut, guests) {
   const params = new URLSearchParams({ checkIn: String(checkIn || ""), checkOut: String(checkOut || ""), guests: String(guests || 1) });
   return `/bookings/new/${listingId}?${params}`;
-}
-
-async function withReservationLock(listingId, action) {
-  const token = randomUUID();
-  const now = new Date();
-  const lock = await Listing.findOneAndUpdate(
-    { _id: listingId, $or: [{ reservationLockUntil: { $lte: now } }, { reservationLockUntil: { $exists: false } }] },
-    { $set: { reservationLockToken: token, reservationLockUntil: new Date(now.getTime() + 30000) } },
-    { new: true },
-  );
-  if (!lock) return { busy: true };
-  try {
-    return await action();
-  } finally {
-    await Listing.updateOne({ _id: listingId, reservationLockToken: token }, { $unset: { reservationLockToken: 1, reservationLockUntil: 1 } });
-  }
 }
 
 module.exports.smartPicks = async (req, res) => {
@@ -97,7 +83,30 @@ module.exports.beginBooking = async (req, res) => {
   if (!listing) return res.status(404).render("listings/error", { statusCode: 404, message: "This place is no longer available." });
   const pattern = String(listing.location || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const alternatives = await Listing.find({ _id: { $ne: listing._id }, location: { $regex: pattern, $options: "i" }, $or: [{ capacity: { $gte: listing.capacity || 2 } }, { capacity: { $exists: false } }], price: { $lte: Math.ceil((listing.price || 0) * 1.35) } }).populate("reviews", "rating").limit(3).sort({ price: 1 });
-  res.render("features/booking", { listing, price: null, values: req.query, alternatives });
+  res.render("features/booking", {
+    listing,
+    price: null,
+    values: req.query,
+    alternatives,
+    paymentEnabled: razorpay.isConfigured(),
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID || "",
+  });
+};
+
+module.exports.checkAvailability = async (req, res) => {
+  if (!validId(req.params.listingId)) return res.status(400).json({ error: "Invalid stay id." });
+  const listing = await Listing.findById(req.params.listingId).select("_id");
+  if (!listing) return res.status(404).json({ error: "Stay not found." });
+  const checkIn = parseDateOnly(req.query.checkIn);
+  const checkOut = parseDateOnly(req.query.checkOut);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (!checkIn || !checkOut || checkIn < today || checkOut <= checkIn || (checkOut - checkIn) / 86400000 > 365) {
+    return res.status(400).json({ error: "Choose a future check-in and a later check-out date." });
+  }
+  res.set("Cache-Control", "no-store");
+  const available = await isAvailable(listing._id, checkIn, checkOut);
+  res.json({ available, checkedAt: new Date().toISOString() });
 };
 
 module.exports.checkout = async (req, res) => {
@@ -113,7 +122,7 @@ module.exports.checkout = async (req, res) => {
     req.flash("error", "Choose valid dates and a guest count this place can host.");
     return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
   }
-  const check = await withReservationLock(listing._id, () => Booking.exists({ listing: listing._id, status: "confirmed", checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } }));
+  const check = await withReservationLock(listing._id, () => Booking.exists(availabilityFilter(listing._id, checkIn, checkOut)));
   if (check.busy) {
     req.flash("error", "Availability is being updated. Please try once more.");
     return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
@@ -123,10 +132,19 @@ module.exports.checkout = async (req, res) => {
     return res.redirect(bookingUrl(listing._id, req.body.checkIn, req.body.checkOut, req.body.guests));
   }
   req.session.pendingBooking = { listingId: String(listing._id), checkIn: checkIn.toISOString(), checkOut: checkOut.toISOString(), guests, price };
-  res.render("features/checkout", { listing, booking: req.session.pendingBooking, perPerson: Math.ceil(price.total / guests) });
+  res.render("features/checkout", {
+    listing,
+    booking: req.session.pendingBooking,
+    perPerson: Math.ceil(price.total / guests),
+    paymentEnabled: razorpay.isConfigured(),
+  });
 };
 
 module.exports.confirmBooking = async (req, res) => {
+  if (razorpay.isConfigured()) {
+    req.flash("error", "Please complete payment through the secure checkout.");
+    return res.redirect("/listings");
+  }
   const pending = req.session.pendingBooking;
   if (!pending || !validId(pending.listingId)) {
     req.flash("error", "Your checkout expired. Please choose dates again.");
@@ -136,9 +154,9 @@ module.exports.confirmBooking = async (req, res) => {
   if (!listing) return res.status(404).render("listings/error", { statusCode: 404, message: "This place is no longer available." });
   const checkIn = new Date(pending.checkIn); const checkOut = new Date(pending.checkOut);
   const result = await withReservationLock(listing._id, async () => {
-    const conflict = await Booking.exists({ listing: listing._id, status: "confirmed", checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } });
+    const conflict = await Booking.exists(availabilityFilter(listing._id, checkIn, checkOut));
     if (conflict) return { conflict: true };
-    const booking = await Booking.create({ guest: req.user._id, listing: listing._id, checkIn, checkOut, guests: pending.guests, nightlyRate: listing.price, ...pending.price, status: "confirmed" });
+    const booking = await Booking.create({ guest: req.user._id, listing: listing._id, checkIn, checkOut, guests: pending.guests, nightlyRate: listing.price, ...pending.price, status: "confirmed", paymentProvider: "demo", paymentStatus: "demo" });
     return { booking };
   });
   if (result.busy) {
@@ -165,12 +183,23 @@ module.exports.cancelBooking = async (req, res) => {
   if (!validId(req.params.id)) return res.status(404).render("listings/error", { statusCode: 404, message: "Reservation not found." });
   const booking = await Booking.findOne({ _id: req.params.id, guest: req.user._id });
   if (!booking) return res.status(404).render("listings/error", { statusCode: 404, message: "Reservation not found." });
+  if (booking.status === "cancelled") {
+    req.flash("error", "This reservation is already cancelled.");
+    return res.redirect("/my-trips");
+  }
   if (booking.checkIn <= new Date()) {
     req.flash("error", "A reservation can only be cancelled before check-in.");
   } else {
-    booking.status = "cancelled";
-    await booking.save();
-    req.flash("success", "Reservation cancelled.");
+    try {
+      if (booking.paymentProvider === "razorpay" && booking.paymentStatus === "paid") {
+        await paymentsController.issueBookingRefund(booking);
+      }
+      booking.status = "cancelled";
+      await booking.save();
+      req.flash("success", booking.paymentProvider === "razorpay" ? "Reservation cancelled. Your refund has been requested." : "Reservation cancelled.");
+    } catch (error) {
+      req.flash("error", "The refund could not be started, so the reservation is still active. Please try again or contact support.");
+    }
   }
   res.redirect("/my-trips");
 };

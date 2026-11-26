@@ -13,6 +13,7 @@ const {
   validateUser,
   verifyEmail,
   verifyUserEmail,
+  rateLimit,
 } = require("../middleware");
 
 const userController = require("../controllers/users");
@@ -33,6 +34,7 @@ router
   .get(userController.renderLoginForm)
   .post(
     saveRedirectUrl,
+    rateLimit({ scope: "login", windowMs: 15 * 60 * 1000, max: 10 }),
     passport.authenticate("local", {
       failureRedirect: "/login", // redirect to login page
       failureFlash: true, //when username or password is incorrect

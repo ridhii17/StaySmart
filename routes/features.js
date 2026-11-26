@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, rateLimit } = require("../middleware");
 const features = require("../controllers/features");
 
 router.get("/smart-picks", wrapAsync(features.smartPicks));
@@ -26,5 +26,6 @@ router.delete("/trips/:id/stays/:listingId", isLoggedIn, wrapAsync(features.remo
 router.post("/trips/:id/expenses", isLoggedIn, wrapAsync(features.addExpense));
 router.delete("/trips/:id/expenses/:expenseId", isLoggedIn, wrapAsync(features.removeExpense));
 router.get("/api/nearby/:id", wrapAsync(features.nearby));
+router.get("/api/availability/:listingId", rateLimit({ scope: "availability", windowMs: 60 * 1000, max: 40 }), wrapAsync(features.checkAvailability));
 
 module.exports = router;

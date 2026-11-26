@@ -1,13 +1,15 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/features.css" />
 <main class="smart-page smart-narrow"><a class="smart-back" href="/listings/<%= listing._id %>">← Back to place</a><header class="smart-hero"><div><p class="smart-eyebrow">RESERVE YOUR STAY</p><h1>Choose your dates</h1><p><%= listing.title %> · <%= [listing.location, listing.country].filter(Boolean).join(", ") %></p></div></header>
-  <div class="booking-layout"><form class="smart-panel" action="/bookings/checkout/<%= listing._id %>" method="POST">
-    <label>Check-in<input type="date" name="checkIn" min="<%= new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()) %>" value="<%= values.checkIn || '' %>" required /></label>
-    <label>Check-out<input type="date" name="checkOut" min="<%= new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()) %>" value="<%= values.checkOut || '' %>" required /></label>
+  <div class="booking-layout"><form class="smart-panel" id="availabilityForm" action="/bookings/checkout/<%= listing._id %>" method="POST" data-availability-url="/api/availability/<%= listing._id %>">
+    <label>Check-in<input type="date" name="checkIn" id="bookingCheckIn" min="<%= new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()) %>" value="<%= values.checkIn || '' %>" required /></label>
+    <label>Check-out<input type="date" name="checkOut" id="bookingCheckOut" min="<%= new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()) %>" value="<%= values.checkOut || '' %>" required /></label>
     <label>Guests<input type="number" name="guests" min="1" max="<%= listing.capacity || 2 %>" value="<%= values.guests || 1 %>" required /></label>
     <div class="booking-rate"><span>₹<%= Number(listing.price || 0).toLocaleString("en-IN") %> / night</span><span>Up to <%= listing.capacity || 2 %> guests</span></div>
-    <button class="smart-button smart-button--wide">Review price</button>
-    <small class="smart-muted">Dates are checked against confirmed reservations before checkout.</small>
+    <p class="availability-status" id="availabilityStatus" data-state="idle" role="status" aria-live="polite">Choose dates to check live availability.</p>
+    <button class="smart-button smart-button--wide" id="reviewPriceButton">Review price</button>
+    <small class="smart-muted">Availability refreshes every 15 seconds and is checked again before checkout.</small>
   </form><aside class="smart-panel booking-preview"><img src="<%= listing.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= listing.title %>"/><h2><%= listing.title %></h2><p><%= listing.description %></p><a href="/listings/<%= listing._id %>">See reviews and place details</a></aside></div>
   <% if (alternatives.length) { %><section class="smart-section"><div class="smart-section-heading"><div><p class="smart-eyebrow">MORE OPTIONS</p><h2>Similar stays nearby</h2><p>If your dates are booked, compare these alternatives.</p></div></div><div class="smart-grid"><% for (const option of alternatives) { %><article class="smart-card"><a class="smart-card__photo" href="/listings/<%= option._id %>"><img src="<%= option.image?.url || '/Icon/listing-img-pre.png' %>" alt="<%= option.title %>"/><span class="smart-card__score">Up to <%= option.capacity || 2 %> guests</span></a><div class="smart-card__body"><h3><%= option.title %></h3><p class="smart-muted"><%= [option.location,option.country].filter(Boolean).join(", ") %></p><p class="smart-price">₹<%= Number(option.price || 0).toLocaleString("en-IN") %> <small>/ night</small></p><a class="smart-button smart-button--outline" href="/bookings/new/<%= option._id %>">Check dates</a></div></article><% } %></div></section><% } %>
 </main>
+<script src="/js/availability.js" defer></script>

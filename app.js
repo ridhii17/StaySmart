@@ -23,6 +23,12 @@ const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profile.js");
 const chatbotRouter = require("./routes/chatbot.js");
 const featuresRouter = require("./routes/features.js");
+const paymentsRouter = require("./routes/payments.js");
+const paymentController = require("./controllers/payments");
+const wrapAsync = require("./utils/wrapAsync");
+
+app.disable("x-powered-by");
+if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
 
 //MongoDB
 const dbURL = process.env.ATLAS_URL;
@@ -43,8 +49,26 @@ app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// The webhook needs its original bytes so the Razorpay signature can be verified.
+app.post(
+  "/api/payments/razorpay/webhook",
+  express.raw({ type: "application/json", limit: "64kb" }),
+  wrapAsync(paymentController.webhook),
+);
+
 //middleware
-app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  res.set("Cross-Origin-Opener-Policy", "same-origin");
+  if (process.env.NODE_ENV === "production" && req.secure) {
+    res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  next();
+});
+app.use(express.urlencoded({ extended: true, limit: "32kb" }));
 app.use(express.json({ limit: "8kb" }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); // serve static files css work
@@ -68,8 +92,9 @@ const sessionOptions = {
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   },
 };
 
@@ -102,6 +127,7 @@ app.use((req, res, next) => {
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", paymentsRouter);
 app.use("/", featuresRouter);
 app.use("/", userRouter);
 app.use("/profile", profileRouter);

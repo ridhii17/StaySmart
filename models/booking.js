@@ -14,6 +14,13 @@ const bookingSchema = new Schema({
   cleaningFee: { type: Number, required: true },
   total: { type: Number, required: true },
   status: { type: String, enum: ["confirmed", "cancelled"], default: "confirmed", index: true },
+  paymentProvider: { type: String, enum: ["demo", "razorpay"], default: "demo" },
+  paymentStatus: { type: String, enum: ["demo", "paid", "refund_pending", "refunded"], default: "demo" },
+  paymentOrderId: { type: String, unique: true, sparse: true },
+  paymentId: String,
 }, { timestamps: true });
+
+bookingSchema.index({ listing: 1, status: 1, checkIn: 1, checkOut: 1 });
+bookingSchema.index({ guest: 1, checkIn: -1 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

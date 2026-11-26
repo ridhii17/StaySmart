@@ -1,6 +1,8 @@
 const Listing = require("./models/listing");
 const Review = require("./models/review");
 const User = require("./models/user");
+const RequestCounter = require("./models/request-counter");
+const { createHash } = require("crypto");
 const ExpressError = require("./utils/ExpressError");
 const { listingSchema, reviewSchema , userSchema} = require("./schema");
 
@@ -179,6 +181,40 @@ module.exports.validateUser = (req, res, next) => {
     }
   } else {
     next();
+  }
+};
+
+module.exports.rateLimit = ({ scope, windowMs, max, skip = () => false }) => async (req, res, next) => {
+  if (skip(req)) return next();
+  const now = Date.now();
+  const windowNumber = Math.floor(now / windowMs);
+  const ipHash = createHash("sha256").update(String(req.ip || "unknown")).digest("hex");
+  const key = `${scope}:${ipHash}:${windowNumber}`;
+  const expiresAt = new Date((windowNumber + 1) * windowMs + 60000);
+
+  try {
+    let counter;
+    try {
+      counter = await RequestCounter.findOneAndUpdate(
+        { key },
+        { $inc: { count: 1 }, $setOnInsert: { expiresAt } },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
+    } catch (error) {
+      if (error.code !== 11000) throw error;
+      counter = await RequestCounter.findOneAndUpdate({ key }, { $inc: { count: 1 } }, { new: true });
+    }
+
+    res.set("RateLimit-Limit", String(max));
+    res.set("RateLimit-Remaining", String(Math.max(0, max - counter.count)));
+    if (counter.count <= max) return next();
+
+    const retryAfter = Math.max(1, Math.ceil(((windowNumber + 1) * windowMs - now) / 1000));
+    res.set("Retry-After", String(retryAfter));
+    if (req.path.startsWith("/api/")) return res.status(429).json({ error: "Too many requests. Please wait and try again." });
+    return res.status(429).render("listings/error", { statusCode: 429, message: "Too many requests. Please wait a moment and try again." });
+  } catch (error) {
+    next(error);
   }
 };
 
